@@ -10,3 +10,10 @@ ManualSave0.sav.bak_before_user_items
 *.sav.*
 *.bak
 *.bak*
+
+# Test & Playwright artifacts
+.playwright-mcp/
+
+# Local Icon Cache
+gui/public/icons/*.png
+gui/public/icons/*.jpg

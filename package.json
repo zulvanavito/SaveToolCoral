@@ -12,9 +12,9 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {},
   "scripts": {
-    "test": "node test/test_roundtrip.js"
+    "test": "node test/test_roundtrip.js",
+    "gui": "node gui/server.js"
   },
   "repository": {
     "type": "git",
@@ -33,5 +33,8 @@
   "bugs": {
     "url": "https://github.com/ch1pset/UESaveTool/issues"
   },
-  "homepage": "https://github.com/ch1pset/UESaveTool#readme"
+  "homepage": "https://github.com/ch1pset/UESaveTool#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }

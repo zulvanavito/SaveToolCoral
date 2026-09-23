@@ -215,3 +215,26 @@ Jika game Coral Island mengalami crash atau tidak dapat memuat save game, perhat
 5. **Tips Aman**:
    - Selalu buat backup file save asli Anda sebelum mengganti file di direktori save game game:
      `%LOCALAPPDATA%\ProjectCoral\Saved\SaveGames\`
+
+---
+
+## 10. Web GUI Editor Lokal (SaveToolCoral GUI)
+
+SaveToolCoral menyediakan antarmuka grafis berbasis web lokal yang sangat mudah digunakan tanpa perlu mengingat perintah CLI:
+
+```powershell
+# Menjalankan server GUI
+npm run gui
+```
+
+Atau cukup klik dua kali file **`gui.cmd`** di Windows Explorer.
+
+Buka browser di **`http://localhost:3000`** untuk:
+
+- Mengunggah file savegame secara aman via **Drag & Drop** atau **Pilih File (File Picker)** tanpa risiko salah menimpa file di AppData.
+- Mengedit 40 slot tas secara visual (Hotbar + 3 baris tas).
+- Autocomplete pencarian 5.100+ item dari database Coral Island.
+- Memilih tingkatan kualitas bintang (Normal, Bronze, Silver, Gold, Osmium).
+- Mengedit nama karakter, nama kebun, title, Gold, dan Merit Points.
+- Mengunduh langsung file `.sav` biner resmi yang telah lolos uji integritas `SaveValidator`.
+- Menyalin jalur direktori savegame game (`%LOCALAPPDATA%\ProjectCoral\...`) sekali klik.

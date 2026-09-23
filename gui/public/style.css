@@ -1,0 +1,109 @@
+/* SaveToolCoral GUI - Refined Theme (Coolors: #eff5f5, #116379, #77c6e1, #0aa0eb, #3fd0e7) */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+:root {
+  --color-surface-base: #eff5f5;
+  --color-surface-card: #ffffff;
+  --color-brand-primary: #116379;
+  --color-brand-darker: #0c4959;
+  --color-brand-muted: #4d7a86;
+  --color-accent-sky: #77c6e1;
+  --color-interactive-azure: #0aa0eb;
+  --color-accent-seafoam: #3fd0e7;
+  --color-border: #cfe3e7;
+  --color-border-subtle: #e0eff1;
+}
+
+body {
+  font-family:
+    "Plus Jakarta Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  background-color: var(--color-surface-base);
+  color: var(--color-brand-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom crisp scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #eff5f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #77c6e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #116379;
+}
+
+/* Slot Card styling */
+.slot-card {
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.slot-card:hover {
+  border-color: var(--color-interactive-azure);
+}
+
+/* Slot Hotbar Marker */
+.slot-hotbar {
+  border-top: 3px solid var(--color-interactive-azure) !important;
+}
+
+/* Quality Badges (Clean, Matte, Accessible) */
+.badge-osmium {
+  background-color: #f5eefb;
+  color: #5b1c8f;
+  border: 1px solid #d6aef8;
+}
+.badge-gold {
+  background-color: #fcf8e6;
+  color: #8f6804;
+  border: 1px solid #ecd57c;
+}
+.badge-silver {
+  background-color: #eef2f5;
+  color: #405463;
+  border: 1px solid #c1ccd4;
+}
+.badge-bronze {
+  background-color: #fbf1eb;
+  color: #8c3c10;
+  border: 1px solid #e8b99d;
+}
+.badge-tool {
+  background-color: #e6f6fa;
+  color: #116379;
+  border: 1px solid #77c6e1;
+}
+
+/* Drag & Drop Zone */
+.dropzone {
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.dropzone.drag-active {
+  border-color: var(--color-interactive-azure) !important;
+  background-color: #e6f6fa !important;
+}
+
+/* Item Icon Image Styling */
+.item-icon {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 1px 2px rgba(17, 99, 121, 0.12));
+}
+
+.item-icon-hover:hover {
+  transform: scale(1.08);
+  transition: transform 0.12s ease-out;
+}
