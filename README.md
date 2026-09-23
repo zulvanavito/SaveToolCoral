@@ -1,197 +1,167 @@
-# UESaveTool
-A Node.js implementation for deserializing and converting GVAS/.sav files to JSON and vice-versa.
+# SaveToolCoral
 
-[![npm version](https://badgen.net/npm/v/uesavetool)](https://www.npmjs.com/package/uesavetool) [![npm license](https://badgen.net/npm/license/uesavetool)](/LICENSE)
+A dedicated Unreal Engine 4.27 GVAS save game editor and converter specifically tailored for **Coral Island**, forked and expanded from [ch1pset/UESaveTool](https://github.com/ch1pset/UESaveTool).
 
-## Usage
-You must have [Node.js](www.nodejs.org) Version 16.7.0+ installed.  
-Download/Clone this entire repo by clicking on the `Code` button above.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](/LICENSE)
+[![Engine: UE 4.27](https://img.shields.io/badge/Unreal%20Engine-4.27-brightgreen.svg)]()
+[![Game: Coral Island](https://img.shields.io/badge/Game-Coral%20Island-teal.svg)]()
 
-#### Convert Between .sav and .json
-```
-node ./usavetool.js [mode: -sav-to-json, -json-to-sav] [input path] [output path?]
-```
+> **Credits & Attribution:**  
+> This project is forked from [UESaveTool](https://github.com/ch1pset/UESaveTool) by [ch1pset](https://github.com/ch1pset). Original GVAS parsing and serialization architecture belongs to `ch1pset`. SaveToolCoral extends the original tool with dedicated Coral Island features, chunked Zlib decompression/compression (`0x9E2A83C1`), custom property handlers, automated 4-stage save validation, and character & inventory editing CLI.
 
-#### Pipe output to another script
-```
-node ./uesavetool.js [mode] [input] | my-script
-```
+---
 
-## Adding to your project
+## Features
 
-First things first:
-```
-npm install uesavetool
-```
-Also set `type` as `module` in `package.json`. Only `ESModules` are supported currently.
-```json
-{
-  "type": "module"
-}
-```
+- **Full Coral Island Compatibility (UE 4.27)**:
+  - Transparent handling of outer GVAS container (`C_CompressedSaveGame`) and inner payload (`C_SaveGame`).
+  - Native support for Unreal package chunked Zlib compression (`0x9E2A83C1` `PACKAGE_FILE_TAG`) with 128 KB chunk blocks.
+- **Complete Property Serialization**:
+  - Full support for `ByteProperty`, `BoolProperty`, `IntProperty`, `Int64Property`, `FloatProperty`, `NameProperty`, `StrProperty`, `TextProperty`, `EnumProperty`, `StructProperty`, `ArrayProperty`, `MapProperty`, `SetProperty`, `ObjectProperty`, and `SoftObjectProperty`.
+  - **UnknownProperty Fallback**: Safeguards unrecognized property types by storing and re-emitting raw binary buffers without data corruption.
+- **Character & Profile Editor**:
+  - Edit character name, title/honorific (`CustomGenderText`), gender enum, and farm name across both `C_PlayerInformation` and `C_ChangedPlayerInfo`.
+- **Inventory & Item Management**:
+  - View full visual table of all 40 slots (Hotbar & Bags).
+  - Add or modify item stacks and quantities directly in `.sav` files.
+  - Native support for Coral Island quality tiers: Base, Bronze (`-a`), Silver (`-b`), Gold (`-c`), and **Osmium** (`-d`).
+- **4-Stage Automated Save Validation (`SaveValidator`)**:
+  - Verifies GVAS header magic, property tree integrity, compression block validity, and round-trip re-deserialization before writing to disk.
 
-#### Using `Gvas` class for deserialization
-```js
-import * as fs from 'fs'
-import { Gvas, Serializer } from 'uesavetool'
+---
 
-fs.readFile(sav-path, (err, buf) => {
-    if(err) throw err;
+## Requirements
 
-    const gvas = new Gvas();
-    const serial = new Serializer(buf);
-    gvas.deserialize(serial);
-    
-    // manipulate gvas here
+- **Node.js**: Version 16.7.0 or newer (tested on Node.js 18, 20, and 24).
+- Windows PowerShell, Command Prompt, or Linux/macOS terminal.
 
-    fs.writeFile(json-path, JSON.stringify(gvas), (err) => {
-        if(err) throw err;
-    })
-})
+---
+
+## Quick Start (CLI)
+
+All operations can be executed directly using `UESaveTool-CoralIsland.js`:
+
+### 1. View Character & Save Details
+
+```powershell
+node ./UESaveTool-CoralIsland.js info ManualSave0.sav
 ```
 
-#### Using `Gvas` class for serialization
-```js
-import * as fs from 'fs';
-import { Gvas } from 'uesavetool';
+### 2. View Inventory Slots
 
-fs.readFile(json-path, 'utf8', (err, data) => {
-    if(err) throw err;
+Displays all 40 slots with row numbers, indices, item IDs, names, and quantities:
 
-    const gvas = Gvas.from(JSON.parse(data));
-
-    // manipulate gvas here
-
-    fs.writeFile(sav-path, gvas.serialize(), (err) => {
-        if(err) throw err;
-    })
-})
+```powershell
+node ./UESaveTool-CoralIsland.js inventory ManualSave0.sav
 ```
 
-## Implementation Notes
-If you want to expand functionality of this tool, you should follow the design patterns implemented within:
-+ All Properties extend from the `Property` class which has 4 functions: `get Size()`,`deserialize()`, `serialize()`, and `static from()`
-+ Properties are in charge of serializing/deserializing themselves due to the unique formatting for each property
-+ Use the `Serializer` class to read/write data on it's internal `Buffer`
-+ Never instantiate a `Property` with `new` outside of a constructor or it's own `from` function, instead, you should use the `PropertyFactory.create()` static function, which passes an object argument to the `from()` function implemented within the specified property type
-+ For integration in other projects, you should use the `Gvas` class, which has 4 functions: `get Size()`, `deserialize()`, `serialize()`, and `static from()`
-+ `deserialize()` accepts a `Serializer` as an argument, and returns the `Gvas` instance
-+ Properties' names must be exactly the same as in the .sav
-+ `Array` properties are implementation dependent due to unique serialization
-+ Size calcualated by `get Size()` is NOT written to the serialized data buffer. That value is usually, but not always, the total size of the property/properties within the current `Property`.
+### 3. Add or Modify Inventory Items Directly
 
-#### Adding a new `Property` type
-`AnotherPropery.js`
-```js
-import { 
-    Property,
-    PropertyFactory,
-    Serializer
-} from 'uesavetool'
+Modify any slot (0–39) directly in the `.sav` file with automatic integrity validation:
 
-export class AnotherProperty extends Property {
-    constructor() {
-        super();
-        // Attributes specific to this property type
-        // Use this.Property for it's value(s)
-    }
-    get Size() {
-        // Calculate number of bytes for serialization. Including this.Name and this.Type
-        // Each string attribute will have a 4-byte size followed by that actual string
-        let size = this.Name + 4;
-        size += this.Type + 4;
-        // this.Property may be another `Property` with it's own `Size` getter
-        return size;
-    }
-    deserialize(serial, size) {
-        // Serial is a `Serialzer` to make this easier
-        // If `size` is passed, use `serial.tell < (start_offset + size)` as a loop condition
-        // Do not deserialize this.Name, this.Type or the serialized Size here.
-        // This function is called from the parent Property which already deserializes them
-        // The Size that is deserialized here is not the same as this.Size
-        return this;
-    }
-    serialize() {
-        let serial = Serializer.alloc(this.Size);
-        serial.writeString(this.Name);
-        serial.writeString(this.Type);
-        serial.writeInt32(/* this.Property size in bytes */)
-        serial.seek(/* padding length */)
-        // serialize this.Property
-        return serial.Data;
-    }
-    static from(obj) {
-        let prop = new AnotherProperty();
-        prop.Name = obj.Name
-        prop.Type = obj.Type
-        if(obj.Property) {
-            // If this.Property is a value
-            prop.Property = obj.Property
+```powershell
+# Format: node ./UESaveTool-CoralIsland.js set-item <file.sav> --slot <0-39> --id <itemId> [--qty <count>]
 
-            // If this.Property is a `Property`
-            prop.Property = PropertyFactory.create(obj.Property);
-        }
-        return prop;
-    }
-}
-```
-`index.js`
-```js
-import { PropertyFactory } from 'uesavetool'
-import { AnotherProperty } from './AnotherProperty.js'
+# Example 1: Add 50 Auto Chests in Row 1 Slot 4 (Index 3)
+node ./UESaveTool-CoralIsland.js set-item ManualSave0.sav --slot 3 --id item_65535 --qty 50
 
-PropertyFactory.Properties['AnotherProperty'] = AnotherProperty;
-
-export { AnotherProperty }
+# Example 2: Add 999 Osmium Arame in Row 1 Slot 10 (Index 9)
+node ./UESaveTool-CoralIsland.js set-item ManualSave0.sav --slot 9 --id item_50320-d --qty 999
 ```
 
-#### Adding a new `Array` type
-Essentially the same as adding a new `Property` type, but since `ArrayProperty.StoredPropertyType` will be a normal `Property` name, adding to `PropertyFactory` is different. Also `Size` will **ONLY** include the size of it's properties.
+### 4. Convert Between `.sav` and `.json`
 
-`index.js`
-```js
-import { PropertyFactory } from 'uesavetool'
-import { AnotherProperty } from './AnotherProperty.js'
-import { AnotherPropertyArray } from './AnotherPropertyArray.js'
+```powershell
+# Decompress and convert save to JSON
+node ./UESaveTool-CoralIsland.js convert ManualSave0.sav ManualSave0.json
 
-PropertyFactory.Properties['AnotherPropertyArray'] = AnotherPropertyArray //Needed if `Type` string ends with "Array" after being stored
-PropertyFactory.Arrays['AnotherProperty'] = AnotherPropertyArray //
-
-export { AnotherPropertyArray }
+# Validate and rebuild JSON back into .sav
+node ./UESaveTool-CoralIsland.js rebuild ManualSave0.json ManualSave0_rebuilt.sav
 ```
 
-#### Notes on `PropertyFactory.js`
-`PropertyFactory` will automatically trim null-terminating characters from strings. The name of the `Property` type will be in the .sav in utf8
+### 5. Edit Character Profile
 
-## Anotomy of a `Property` in a GVAS
-Sizes are in Little-Endian, so the first byte read is the least significant. Strings are null-terminating. The following example is an `StrProperty` type.
+```powershell
+node ./UESaveTool-CoralIsland.js edit-player ManualSave0.json --name Ito --title Tuan --farm "Mey Farm"
+```
 
-|                       | Bytes                                     | Value
-|:----------------------|:------------------------------------------|:------------------
-| Name Size             | 0D 00 00 00                               | 13 bytes
-| Name                  | 53 61 76 65 53 6C 6F 74 4E 61 6D 65 00    | "SaveSlotName\0"
-| Type Size             | 0C 00 00 00                               | 12 bytes
-| Type                  | 53 74 72 50 72 6F 70 65 72 74 79 00       | "StrProperty\0"
-| Property Size         | 0E 00 00 00                               | 14 bytes
-| Padding               | 00 00 00 00 00                            | 5 null characters
-| Property Value Size   | 0A 00 00 00                               | 10 bytes
-| Property Value        | 47 61 6D 65 53 74 61 74 65 00             | "GameState\0"
+---
 
-Padding is different for most properties. Some properties contain a `StoredPropertyType` value, such as the `StructProperty` and `ArrayProperty`. The `Tuple` does not exist in a GVAS, instead, `Tuple` was written to encapsulate lists of properties within the `StructProperty` and `Gvas.Properties`. A `Tuple` is used whenever the string `None` appears within the file and marks the end of a list of properties.
+## Item Quality System Reference
 
-## Disclaimer
-**THIS SCRIPT WAS BUILT FOR THE BPM: BULLETS PER MINUTE COMMUNITY, BUT THIS MAY PROVE USEFUL FOR OTHER UE-BASED GAMES. IT IS NOT GUARANTEED TO WORK FOR ALL UE GAME SAVES.**
+In Coral Island, item qualities (for crops, foraging, fish, critters, and ocean scavenging) are identified by DataTable ID suffixes:
 
-## Verification Tools
-##### HxD Freeware Hex Editor
-https://mh-nexus.de/en/hxd/
-##### Notepad++
-https://notepad-plus-plus.org/
+| Quality            | Suffix   | Example Item ID | Displayed Name             |
+| :----------------- | :------- | :-------------- | :------------------------- |
+| **Regular / Base** | _(none)_ | `item_50320`    | Arame (No star)            |
+| **Bronze**         | `-a`     | `item_50320-a`  | Bronze Star Arame          |
+| **Silver**         | `-b`     | `item_50320-b`  | Silver Star Arame          |
+| **Gold**           | `-c`     | `item_50320-c`  | Gold Star Arame            |
+| **Osmium**         | `-d`     | `item_50320-d`  | Osmium Star Arame (Purple) |
 
-## Credits
-##### GVAS Converter
-https://github.com/13xforever/gvas-converter
+_Full item databases are provided in `DT_InventoryItems.json` and English name mappings in `coral_island_en.json`._
 
-##### UeSaveSerializer
-https://gist.github.com/Rob7045713/2f838ad66237f87c86d5396af573b71c
+---
 
+## Programmatic Usage (API)
+
+SaveToolCoral can be used as an ESModule in your own Node.js scripts:
+
+```javascript
+import fs from "fs";
+import { Gvas, CoralPlayerEditor, SaveValidator } from "./index.js";
+
+// Read and deserialize
+const buf = fs.readFileSync("ManualSave0.sav");
+const gvas = new Gvas();
+gvas.deserializeFromBuffer(buf);
+
+// Edit character
+CoralPlayerEditor.editPlayer(gvas, {
+  name: "Ito",
+  title: "Tuan",
+  farmName: "Mey Farm",
+});
+
+// Edit inventory slot
+CoralPlayerEditor.setInventorySlot(gvas, 3, "item_65535", 50);
+
+// Serialize and validate
+const outBuf = gvas.serializeToBuffer();
+SaveValidator.validate(outBuf, gvas);
+
+fs.writeFileSync("ManualSave0_modified.sav", outBuf);
+```
+
+---
+
+## Implementation Details & Design Patterns
+
+If you wish to expand functionality, adhere to the core architecture:
+
+- All properties extend the base [`Property`](file:///d:/01%20Projects/savetool/models/properties/Property.js) class implementing `get Size()`, `deserialize()`, `serialize()`, and `static from()`.
+- Never instantiate a `Property` directly with `new` outside its own constructor/`from` method; always instantiate via `PropertyFactory.create()`.
+- Chunked compression and decompression are handled by [`CoralCompressor`](file:///d:/01%20Projects/savetool/utils/CoralCompressor.js) with 48-byte headers and Zlib deflate.
+- Save validation is performed by [`SaveValidator`](file:///d:/01%20Projects/savetool/utils/SaveValidator.js) to guarantee game compatibility before writing.
+
+---
+
+## Acknowledgements & Credits
+
+- **[ch1pset/UESaveTool](https://github.com/ch1pset/UESaveTool)** — Original creator and base repository for Unreal Engine GVAS serialization.
+- **[13xforever/gvas-converter](https://github.com/13xforever/gvas-converter)** — GVAS conversion research.
+- **[Rob7045713/UeSaveSerializer](https://gist.github.com/Rob7045713/2f838ad66237f87c86d5396af573b71c)** — UE save serialization reference.
+- ***
+
+## Acknowledgements & Credits
+
+- **[ch1pset/UESaveTool](https://github.com/ch1pset/UESaveTool)** — Original creator and base repository for Unreal Engine GVAS serialization.
+- **[13xforever/gvas-converter](https://github.com/13xforever/gvas-converter)** — GVAS conversion research.
+- **[Rob7045713/UeSaveSerializer](https://gist.github.com/Rob7045713/2f838ad66237f87c86d5396af573b71c)** — UE save serialization reference.
+- **[koenigderluegner/coral-island-guide](https://github.com/koenigderluegner/coral-island-guide)** — Coral Island item data references.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](/LICENSE).
