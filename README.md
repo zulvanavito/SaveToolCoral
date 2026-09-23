@@ -21,6 +21,13 @@ A dedicated Unreal Engine 4.27 GVAS save game editor and converter specifically 
   - **UnknownProperty Fallback**: Safeguards unrecognized property types by storing and re-emitting raw binary buffers without data corruption.
 - **Character & Profile Editor**:
   - Edit character name, title/honorific (`CustomGenderText`), gender enum, and farm name across both `C_PlayerInformation` and `C_ChangedPlayerInfo`.
+- **Modern Interactive Web GUI Editor**:
+  - **Safe Drag & Drop & File Picker Upload**: Isolated in-memory editing without risky AppData auto-scanning; edits only the file you explicitly upload.
+  - **Visual Item Artwork & Smart Local Cache**: Displays authentic game icons sourced from [Coral Island Fandom Wiki](https://coralisland.fandom.com/wiki/Coral_Island_Wiki) with fast local manifest indexing (`icon_index.json`) and native HTTP disk caching.
+  - **Interactive 40-Slot Bag**: Visual Hotbar (slots 1–10) and interior bag grids with star tiers (Normal, Bronze, Silver, Gold, Osmium) and live quantity badges.
+  - **In-Memory Instant Search**: Fast autocomplete searching over 5,160+ DataTable items with icon thumbnails.
+  - **Character & Economy Form**: Edit player name, farm name, honorific title, gender, Gold, and Merit Points with quick-increment buttons.
+  - **Direct Validated Download**: 1-click download of the rebuilt `.sav` binary file after passing 4-stage integrity tests.
 - **Inventory & Item Management**:
   - View full visual table of all 40 slots (Hotbar & Bags).
   - Add or modify item stacks and quantities directly in `.sav` files.
@@ -34,12 +41,42 @@ A dedicated Unreal Engine 4.27 GVAS save game editor and converter specifically 
 
 - **Node.js**: Version 16.7.0 or newer (tested on Node.js 18, 20, and 24).
 - Windows PowerShell, Command Prompt, or Linux/macOS terminal.
+- Modern web browser (Chrome, Edge, Firefox, Safari, Brave).
+
+---
+
+## Web GUI Editor (Recommended)
+
+SaveToolCoral features a fast, clean, tropical coastal-themed Web GUI:
+
+### Running the Web GUI
+
+```powershell
+npm run gui
+# or simply double-click gui.cmd in Windows Explorer
+```
+
+Open your browser at:
+```
+http://localhost:3000
+```
+
+### GUI Workflow
+
+1. **Upload Save File**: Drag and drop your `.sav` file (e.g. `ManualSave0.sav`) into the dropzone or click **"Pilih File (.sav)"**.
+   > **Save Location Guide**: On Windows, Coral Island saves are typically stored at:  
+   > `%LOCALAPPDATA%\ProjectCoral\Saved\SaveGames\World_1\ManualSave0.sav`
+2. **Edit Inventory & Player**:
+   - Click any of the 40 slot cards to edit the item, adjust quantity (1–999), or pick star quality (Normal, Bronze, Silver, Gold, Osmium).
+   - Use the search bar to find any of the 5,160+ items in the game database with icon thumbnails.
+   - Switch to the **Profil dan Karakter** tab to edit character name, farm name, title, gender, Gold, or Merit Points.
+3. **Download Validated Save**: Click **"Unduh File (.sav)"** in the top bar to download the updated save game file. The file is validated through `SaveValidator` to guarantee 100% binary game compatibility.
 
 ---
 
 ## Quick Start (CLI)
 
-All operations can be executed directly using `UESaveTool-CoralIsland.js`:
+All operations can also be executed directly via terminal using `UESaveTool-CoralIsland.js`:
 
 ### 1. View Character & Save Details
 
@@ -151,13 +188,7 @@ If you wish to expand functionality, adhere to the core architecture:
 - **[ch1pset/UESaveTool](https://github.com/ch1pset/UESaveTool)** — Original creator and base repository for Unreal Engine GVAS serialization.
 - **[13xforever/gvas-converter](https://github.com/13xforever/gvas-converter)** — GVAS conversion research.
 - **[Rob7045713/UeSaveSerializer](https://gist.github.com/Rob7045713/2f838ad66237f87c86d5396af573b71c)** — UE save serialization reference.
-- ***
-
-## Acknowledgements & Credits
-
-- **[ch1pset/UESaveTool](https://github.com/ch1pset/UESaveTool)** — Original creator and base repository for Unreal Engine GVAS serialization.
-- **[13xforever/gvas-converter](https://github.com/13xforever/gvas-converter)** — GVAS conversion research.
-- **[Rob7045713/UeSaveSerializer](https://gist.github.com/Rob7045713/2f838ad66237f87c86d5396af573b71c)** — UE save serialization reference.
+- **[Coral Island Wiki (Fandom)](https://coralisland.fandom.com/wiki/Coral_Island_Wiki)** — Official game artwork & item icons.
 - **[koenigderluegner/coral-island-guide](https://github.com/koenigderluegner/coral-island-guide)** — Coral Island item data references.
 
 ---
