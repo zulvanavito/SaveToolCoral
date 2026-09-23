@@ -1,3 +1,12 @@
 /node_modules
 /.vscode
 /test
+
+# Coral Island Save Files & Backups
+ManualSave0.sav
+ManualSave0.json
+ManualSave0.sav.bak_before_user_items
+*.sav
+*.sav.*
+*.bak
+*.bak*
