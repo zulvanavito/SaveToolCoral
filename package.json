@@ -2,15 +2,19 @@
   "name": "uesavetool",
   "author": "ch1pset",
   "main": "index.js",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "type": "module",
-  "description": "A Node.js implementation for deserializing and converting GVAS/.sav files to JSON and vice-versa.",
+  "description": "A Node.js implementation for deserializing and converting GVAS/.sav files to JSON and vice-versa, with Coral Island support.",
+  "bin": {
+    "uesavetool": "./uesavetool.js",
+    "UESaveTool-CoralIsland": "./UESaveTool-CoralIsland.js"
+  },
   "directories": {
     "test": "test"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/test_roundtrip.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +26,8 @@
     "gvas",
     "save",
     "tool",
-    "serializer"
+    "serializer",
+    "coral-island"
   ],
   "license": "MIT",
   "bugs": {

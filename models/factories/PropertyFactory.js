@@ -1,26 +1,40 @@
-import { TypeNotImplementedError } from '../index.js';
+import { TypeNotImplementedError } from "../PropertyErrors.js";
 
 class Factory {
-    constructor() {
-        this.Properties = {}
-        this.Arrays = {}
+  constructor() {
+    this.Properties = {};
+    this.Arrays = {};
+  }
+  create(obj) {
+    let type = obj.Type ? obj.Type.split("\0")[0] : "UnknownProperty";
+
+    if (this.Properties[type] !== undefined) {
+      return this.Properties[type].from(obj);
     }
-    create(obj) {
-        let type = obj.Type.split('\0')[0]
 
-        if (this.Properties[type] === undefined)
-            throw new TypeNotImplementedError(type);
-
-        return this.Properties[type].from(obj);
+    if (this.Properties["UnknownProperty"] !== undefined) {
+      return this.Properties["UnknownProperty"].from(obj);
     }
-    createArray(obj) {
-        let type = obj.Type.split('\0')[0]
 
-        if (this.Arrays[type] === undefined)
-            throw new TypeNotImplementedError(type);
+    throw new TypeNotImplementedError(type);
+  }
+  createArray(obj) {
+    let type = obj.Type ? obj.Type.split("\0")[0] : "UnknownProperty";
 
-        return this.Arrays[type].from(obj);
+    if (this.Arrays[type] !== undefined) {
+      return this.Arrays[type].from(obj);
     }
+
+    if (this.Properties[type] !== undefined) {
+      return this.Properties[type].from(obj);
+    }
+
+    if (this.Properties["UnknownProperty"] !== undefined) {
+      return this.Properties["UnknownProperty"].from(obj);
+    }
+
+    throw new TypeNotImplementedError(type);
+  }
 }
 
 export const PropertyFactory = new Factory();
