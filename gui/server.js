@@ -19,17 +19,23 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // In-memory item database cache
 console.log("[INIT] Loading item database into memory...");
-let itemDatabase = new Map(); // key: baseId -> item data
+let itemDatabase = new Map();
 let allItemsList = [];
 
 function initItemDatabase() {
   try {
     const dtPath = path.join(rootDir, "DT_InventoryItems.json");
     const enPath = path.join(rootDir, "coral_island_en.json");
+    const idPath = path.join(rootDir, "coral_island_id.json");
 
     let enData = {};
     if (fs.existsSync(enPath)) {
       enData = JSON.parse(fs.readFileSync(enPath, "utf8"));
+    }
+
+    let idData = {};
+    if (fs.existsSync(idPath)) {
+      idData = JSON.parse(fs.readFileSync(idPath, "utf8"));
     }
 
     if (fs.existsSync(dtPath)) {
@@ -55,27 +61,62 @@ function initItemDatabase() {
           baseId = key.slice(0, -2);
         }
 
-        let nameKey = `DT_InventoryItems.${baseId}_name`;
-        let descKey = `DT_InventoryItems.${baseId}_description`;
+        const nsNameKey =
+          row.name?.Namespace && row.name?.Key
+            ? `${row.name.Namespace}.${row.name.Key}`
+            : null;
+        const rawNameKey = row.name?.Key;
+        const fallbackNameKey = `DT_InventoryItems.${baseId}_name`;
 
-        let rawName =
+        const nsDescKey =
+          row.description?.Namespace && row.description?.Key
+            ? `${row.description.Namespace}.${row.description.Key}`
+            : null;
+        const rawDescKey = row.description?.Key;
+        const fallbackDescKey = `DT_InventoryItems.${baseId}_description`;
+
+        const nameEn =
           row.name?.SourceString ||
           row.name?.LocalizedString ||
-          enData[nameKey] ||
+          (nsNameKey && enData[nsNameKey]) ||
+          (rawNameKey && enData[rawNameKey]) ||
+          enData[fallbackNameKey] ||
           enData[key] ||
           baseId;
-        let rawDesc =
+
+        const nameId =
+          (nsNameKey && idData[nsNameKey]) ||
+          (rawNameKey && idData[rawNameKey]) ||
+          idData[fallbackNameKey] ||
+          idData[key] ||
+          nameEn;
+
+        const descEn =
           row.description?.SourceString ||
           row.description?.LocalizedString ||
-          enData[descKey] ||
+          (nsDescKey && enData[nsDescKey]) ||
+          (rawDescKey && enData[rawDescKey]) ||
+          enData[fallbackDescKey] ||
           "";
-        let category = row.displayKey || "General";
+
+        const descId =
+          (nsDescKey && idData[nsDescKey]) ||
+          (rawDescKey && idData[rawDescKey]) ||
+          idData[fallbackDescKey] ||
+          descEn;
+
+        const category = row.displayKey || "General";
 
         if (!itemDatabase.has(baseId)) {
           itemDatabase.set(baseId, {
             baseId,
-            name: rawName,
-            description: rawDesc,
+            name: nameId,
+            nameId,
+            nameEn,
+            description: descId,
+            descId,
+            descEn,
+            iconKey: nameEn,
             category,
             stackable: row.stackable !== false,
             qualities: {
@@ -96,7 +137,7 @@ function initItemDatabase() {
 
       allItemsList = Array.from(itemDatabase.values());
       console.log(
-        `[INIT] Database loaded: ${allItemsList.length} unique base items.`,
+        `[INIT] Database loaded: ${allItemsList.length} unique base items (ID + EN).`,
       );
     } else {
       console.warn("[INIT] DT_InventoryItems.json not found in root dir.");
@@ -108,7 +149,6 @@ function initItemDatabase() {
 
 initItemDatabase();
 
-// Helper: resolve item metadata by any key (including -a, -b, -c, -d)
 function resolveItemInfo(itemId) {
   if (!itemId) return null;
   const cleanId = itemId.replace(/\0/g, "").trim();
@@ -133,7 +173,12 @@ function resolveItemInfo(itemId) {
   return {
     id: cleanId,
     baseId,
-    name: meta?.name || cleanId,
+    name: meta?.nameId || meta?.name || cleanId,
+    nameId: meta?.nameId || cleanId,
+    nameEn: meta?.nameEn || cleanId,
+    descId: meta?.descId || "",
+    descEn: meta?.descEn || "",
+    iconKey: meta?.iconKey || meta?.nameEn || cleanId,
     category: meta?.category || "Unknown",
     quality,
     stackable: meta?.stackable !== false,
@@ -235,31 +280,15 @@ let loadedGvas = null;
 let currentFilename = "ManualSave0.sav";
 let currentOutBuf = null;
 
-// Helper: Parse GVAS buffer into frontend payload
 function parseGvasPayload(buf, filename = "ManualSave0.sav") {
   const gvas = new Gvas();
   gvas.deserializeFromBuffer(buf);
 
-  // Player Information
   const info = CoralPlayerEditor.getPlayerInfo(gvas);
-  const pData = CoralPlayerEditor.findPlayerSaveData(gvas);
+  const stats = CoralPlayerEditor.getPlayerStats(gvas);
+  const world = CoralPlayerEditor.getWorldData(gvas);
+  const npcs = CoralPlayerEditor.getNpcRelationships(gvas);
 
-  let gold = 0;
-  let meritPoints = 0;
-  if (pData?.Properties) {
-    const gProp = pData.Properties.find(
-      (p) => (p.Name || "").replace(/\0/g, "").trim() === "playerCurrentGold",
-    );
-    if (gProp) gold = Number(gProp.Value || 0);
-
-    const mProp = pData.Properties.find(
-      (p) =>
-        (p.Name || "").replace(/\0/g, "").trim() === "playerCurrentMeritPoint",
-    );
-    if (mProp) meritPoints = Number(mProp.Value || 0);
-  }
-
-  // Inventory Slots (Full 40 slots representation)
   const rawInv = CoralPlayerEditor.getInventory(gvas);
   const slots = [];
 
@@ -270,7 +299,12 @@ function parseGvasPayload(buf, filename = "ManualSave0.sav") {
       slots.push({
         slotIndex: i,
         id: match.id,
-        name: meta?.name || match.id,
+        name: meta?.nameId || meta?.name || match.id,
+        nameId: meta?.nameId || match.id,
+        nameEn: meta?.nameEn || match.id,
+        descId: meta?.descId || "",
+        descEn: meta?.descEn || "",
+        iconKey: meta?.iconKey || meta?.nameEn || match.id,
         category: meta?.category || "General",
         quantity: match.quantity || 1,
         quality: meta?.quality || "base",
@@ -283,6 +317,11 @@ function parseGvasPayload(buf, filename = "ManualSave0.sav") {
         slotIndex: i,
         id: "",
         name: "(Kosong)",
+        nameId: "(Kosong)",
+        nameEn: "(Empty)",
+        descId: "",
+        descEn: "",
+        iconKey: "",
         category: "Empty",
         quantity: 0,
         quality: "base",
@@ -305,9 +344,15 @@ function parseGvasPayload(buf, filename = "ManualSave0.sav") {
       farmName: info.farmName || "",
       gender: info.gender || "EC_Gender::Male",
       title: info.title || "",
-      gold,
-      meritPoints,
+      gold: stats.gold,
+      meritPoints: stats.meritPoints,
+      staminaFruit: stats.staminaFruit,
+      wellnessFruit: stats.wellnessFruit,
+      inventoryLimit: stats.inventoryLimit,
     },
+    world,
+    allWaypoints: CoralPlayerEditor.ALL_WAYPOINTS,
+    npcs,
     inventory: slots,
   };
 }
@@ -541,7 +586,6 @@ app.get("/api/load-workspace", (req, res) => {
   }
 });
 
-// GET /api/items - Autocomplete search items from in-memory database
 app.get("/api/items", (req, res) => {
   try {
     const q = (req.query.q || "").toLowerCase().trim();
@@ -557,7 +601,8 @@ app.get("/api/items", (req, res) => {
     const matches = [];
     for (const item of allItemsList) {
       if (
-        item.name.toLowerCase().includes(q) ||
+        (item.nameId && item.nameId.toLowerCase().includes(q)) ||
+        (item.nameEn && item.nameEn.toLowerCase().includes(q)) ||
         item.baseId.toLowerCase().includes(q)
       ) {
         matches.push(item);
@@ -571,7 +616,6 @@ app.get("/api/items", (req, res) => {
   }
 });
 
-// POST /api/save - Update in-memory GVAS and validate 100%
 app.post("/api/save", (req, res) => {
   try {
     if (!loadedGvas) {
@@ -580,9 +624,8 @@ app.post("/api/save", (req, res) => {
         .json({ success: false, error: "Belum ada file save yang dimuat." });
     }
 
-    const { player, inventory } = req.body;
+    const { player, world, npcs, inventory } = req.body;
 
-    // Update player information
     if (player) {
       CoralPlayerEditor.editPlayer(loadedGvas, {
         name: player.name,
@@ -591,27 +634,23 @@ app.post("/api/save", (req, res) => {
         farmName: player.farmName,
       });
 
-      const pData = CoralPlayerEditor.findPlayerSaveData(loadedGvas);
-      if (pData?.Properties) {
-        if (player.gold !== undefined) {
-          const gProp = pData.Properties.find(
-            (p) =>
-              (p.Name || "").replace(/\0/g, "").trim() === "playerCurrentGold",
-          );
-          if (gProp) gProp.Value = Number(player.gold);
-        }
-        if (player.meritPoints !== undefined) {
-          const mProp = pData.Properties.find(
-            (p) =>
-              (p.Name || "").replace(/\0/g, "").trim() ===
-              "playerCurrentMeritPoint",
-          );
-          if (mProp) mProp.Value = Number(player.meritPoints);
-        }
-      }
+      CoralPlayerEditor.editPlayerStats(loadedGvas, {
+        gold: player.gold,
+        meritPoints: player.meritPoints,
+        staminaFruit: player.staminaFruit,
+        wellnessFruit: player.wellnessFruit,
+        inventoryLimit: player.inventoryLimit,
+      });
     }
 
-    // Update inventory slots
+    if (world) {
+      CoralPlayerEditor.editWorldData(loadedGvas, world);
+    }
+
+    if (Array.isArray(npcs)) {
+      CoralPlayerEditor.editNpcRelationships(loadedGvas, npcs);
+    }
+
     if (Array.isArray(inventory)) {
       const pData = CoralPlayerEditor.findPlayerSaveData(loadedGvas);
       const invProp = pData?.Properties?.find(
@@ -651,7 +690,6 @@ app.post("/api/save", (req, res) => {
       }
     }
 
-    // Serialize to binary buffer and validate integrity
     const outBuf = loadedGvas.serializeToBuffer();
     SaveValidator.validate(outBuf, loadedGvas);
     currentOutBuf = outBuf;

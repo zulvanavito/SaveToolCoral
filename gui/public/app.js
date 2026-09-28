@@ -3,6 +3,7 @@ import {
   ref,
   computed,
   onMounted,
+  onUnmounted,
 } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 
 createApp({
@@ -18,7 +19,9 @@ createApp({
     const pathCopied = ref(false);
     const fileInputRef = ref(null);
 
+    const itemLang = ref("id");
     const activeTab = ref("inventory");
+
     const player = ref({
       name: "",
       gender: "EC_Gender::Male",
@@ -26,7 +29,29 @@ createApp({
       farmName: "",
       gold: 0,
       meritPoints: 0,
+      staminaFruit: 0,
+      wellnessFruit: 0,
+      inventoryLimit: 40,
     });
+
+    const world = ref({
+      day: 1,
+      season: "EC_Season::Spring",
+      year: 1,
+      currentWeather: "EC_Weather::Sunny",
+      weatherForecast: "EC_Weather::Sunny",
+      townRank: 0,
+      overallTownPoint: 0,
+      currentTownPoint: 0,
+      waypoints: [],
+    });
+
+    const allWaypoints = ref([]);
+    const npcs = ref([]);
+    const npcSearch = ref("");
+    const npcFilter = ref("all");
+    const npcPage = ref(1);
+    const npcPerPage = ref(12);
     const inventory = ref([]);
 
     const toast = ref({
@@ -53,6 +78,41 @@ createApp({
       setTimeout(() => {
         toast.value.show = false;
       }, 4000);
+    }
+
+    function getIconKey(itemOrSlot) {
+      if (!itemOrSlot) return "";
+      return itemOrSlot.iconKey || itemOrSlot.nameEn || itemOrSlot.name || "";
+    }
+
+    function getItemName(itemOrSlot) {
+      if (!itemOrSlot || itemOrSlot.empty) return "(Kosong)";
+      if (itemLang.value === "id") {
+        return (
+          itemOrSlot.nameId ||
+          itemOrSlot.name ||
+          itemOrSlot.nameEn ||
+          itemOrSlot.id
+        );
+      }
+      return (
+        itemOrSlot.nameEn ||
+        itemOrSlot.name ||
+        itemOrSlot.nameId ||
+        itemOrSlot.id
+      );
+    }
+
+    function getItemDesc(itemOrSlot) {
+      if (!itemOrSlot) return "";
+      if (itemLang.value === "id") {
+        return (
+          itemOrSlot.descId || itemOrSlot.description || itemOrSlot.descEn || ""
+        );
+      }
+      return (
+        itemOrSlot.descEn || itemOrSlot.description || itemOrSlot.descId || ""
+      );
     }
 
     const iconMap = ref({});
@@ -91,6 +151,7 @@ createApp({
         (n) =>
           n &&
           n !== "(Kosong)" &&
+          n !== "(Empty)" &&
           !iconMap.value[n] &&
           !pendingIconFetches.has(n),
       );
@@ -121,21 +182,25 @@ createApp({
     function resolveBagIcons() {
       if (!inventory.value || !Array.isArray(inventory.value)) return;
       const names = inventory.value
-        .filter((s) => !s.empty && s.name && s.name !== "(Kosong)")
-        .map((s) => s.name);
+        .filter((s) => !s.empty && getIconKey(s))
+        .map((s) => getIconKey(s));
       resolveIcons(names);
     }
 
-    function onImageLoad(event, name) {
-      // Image loaded cleanly via browser HTTP cache
+    function onImageLoad() {}
+
+    function onImageError(key) {
+      if (key) iconMap.value[key] = null;
     }
 
-    function onImageError(name) {
-      iconMap.value[name] = null;
+    function handleKeydown(e) {
+      if (e.key === "Escape" && modal.value.open) {
+        closeSlotEditor();
+      }
     }
 
-    // Check game save path and icon stats on mount
     onMounted(async () => {
+      window.addEventListener("keydown", handleKeydown);
       try {
         const res = await fetch("/api/save-path");
         const data = await res.json();
@@ -143,7 +208,6 @@ createApp({
           gameSavePath.value = data.path;
         }
 
-        // Check if workspace file is available as a shortcut
         const wsRes = await fetch("/api/load-workspace");
         if (wsRes.ok) {
           hasWorkspaceFile.value = true;
@@ -153,6 +217,10 @@ createApp({
       } catch (err) {
         console.error("Init error:", err);
       }
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("keydown", handleKeydown);
     });
 
     function triggerFileInput() {
@@ -166,7 +234,7 @@ createApp({
       if (file) {
         processUploadedFile(file);
       }
-      e.target.value = ""; // Reset file input
+      e.target.value = "";
     }
 
     function onDragOver(e) {
@@ -186,6 +254,44 @@ createApp({
       if (file) {
         processUploadedFile(file);
       }
+    }
+
+    function applySavePayload(data) {
+      fileName.value = data.filename;
+      fileSize.value = data.size;
+      player.value = {
+        name: data.player?.name || "",
+        farmName: data.player?.farmName || "",
+        gender: data.player?.gender || "EC_Gender::Male",
+        title: data.player?.title || "",
+        gold: data.player?.gold ?? 0,
+        meritPoints: data.player?.meritPoints ?? 0,
+        staminaFruit: data.player?.staminaFruit ?? 0,
+        wellnessFruit: data.player?.wellnessFruit ?? 0,
+        inventoryLimit: data.player?.inventoryLimit ?? 40,
+      };
+      if (data.world) {
+        world.value = {
+          day: data.world.day ?? 1,
+          season: data.world.season || "EC_Season::Spring",
+          year: data.world.year ?? 1,
+          currentWeather: data.world.currentWeather || "EC_Weather::Sunny",
+          weatherForecast: data.world.weatherForecast || "EC_Weather::Sunny",
+          townRank: data.world.townRank ?? 0,
+          overallTownPoint: data.world.overallTownPoint ?? 0,
+          currentTownPoint: data.world.currentTownPoint ?? 0,
+          waypoints: Array.isArray(data.world.waypoints)
+            ? [...data.world.waypoints]
+            : [],
+        };
+      }
+      if (Array.isArray(data.allWaypoints)) {
+        allWaypoints.value = data.allWaypoints;
+      }
+      npcs.value = Array.isArray(data.npcs) ? data.npcs : [];
+      inventory.value = data.inventory || [];
+      fileLoaded.value = true;
+      resolveBagIcons();
     }
 
     async function processUploadedFile(file) {
@@ -211,13 +317,8 @@ createApp({
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        fileName.value = data.filename;
-        fileSize.value = data.size;
-        player.value = data.player;
-        inventory.value = data.inventory;
-        fileLoaded.value = true;
-        showToast(`File ${data.filename} berhasil dimuat!`);
-        resolveBagIcons();
+        applySavePayload(data);
+        showToast(`File ${data.filename} berhasil dimuat.`);
       } catch (err) {
         showToast("Gagal memproses file: " + err.message, "error");
       } finally {
@@ -225,7 +326,6 @@ createApp({
       }
     }
 
-    // Load workspace save file
     async function loadWorkspaceSave() {
       uploading.value = true;
       try {
@@ -233,13 +333,8 @@ createApp({
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        fileName.value = data.filename;
-        fileSize.value = data.size;
-        player.value = data.player;
-        inventory.value = data.inventory;
-        fileLoaded.value = true;
-        showToast("ManualSave0.sav dari workspace berhasil dimuat!");
-        resolveBagIcons();
+        applySavePayload(data);
+        showToast("ManualSave0.sav dari workspace berhasil dimuat.");
       } catch (err) {
         showToast("Gagal memuat save workspace: " + err.message, "error");
       } finally {
@@ -251,6 +346,7 @@ createApp({
       fileLoaded.value = false;
       fileName.value = "";
       fileSize.value = 0;
+      npcs.value = [];
       inventory.value = [];
     }
 
@@ -258,12 +354,13 @@ createApp({
       if (!fileLoaded.value) return;
       saving.value = true;
       try {
-        // Sync changes to server
         const saveRes = await fetch("/api/save", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             player: player.value,
+            world: world.value,
+            npcs: npcs.value,
             inventory: inventory.value,
           }),
         });
@@ -271,7 +368,6 @@ createApp({
         const saveData = await saveRes.json();
         if (!saveData.success) throw new Error(saveData.error);
 
-        // Trigger browser download
         const a = document.createElement("a");
         a.href = "/api/download";
         a.download = fileName.value || "ManualSave0.sav";
@@ -279,7 +375,7 @@ createApp({
         a.click();
         document.body.removeChild(a);
 
-        showToast("File save tervalidasi dan berhasil diunduh!");
+        showToast("File save tervalidasi dan berhasil diunduh.");
       } catch (err) {
         showToast("Gagal mengunduh save: " + err.message, "error");
       } finally {
@@ -287,7 +383,6 @@ createApp({
       }
     }
 
-    // Copy game save path to clipboard
     function copyGamePath() {
       if (gameSavePath.value) {
         navigator.clipboard.writeText(gameSavePath.value);
@@ -327,10 +422,16 @@ createApp({
       modal.value.open = true;
 
       if (!slot.empty) {
-        modal.value.searchQuery = slot.name;
+        const display = getItemName(slot);
+        modal.value.searchQuery = display;
         modal.value.selectedItem = {
           baseId: slot.id.replace(/-[a-d]$/, ""),
           name: slot.name,
+          nameId: slot.nameId || slot.name,
+          nameEn: slot.nameEn || slot.name,
+          descId: slot.descId || "",
+          descEn: slot.descEn || "",
+          iconKey: getIconKey(slot),
           category: slot.category,
           hasQualities: slot.hasQualities,
           qualities: slot.availableQualities,
@@ -340,14 +441,13 @@ createApp({
         modal.value.selectedItem = null;
       }
 
-      searchItems(modal.value.searchQuery || "osmium");
+      searchItems(modal.value.searchQuery || "");
     }
 
     function closeSlotEditor() {
       modal.value.open = false;
     }
 
-    // Search items in database
     async function searchItems(q = "") {
       modal.value.isSearching = true;
       try {
@@ -357,7 +457,7 @@ createApp({
         const data = await res.json();
         if (data.success) {
           modal.value.searchResults = data.items;
-          resolveIcons(data.items.map((it) => it.name));
+          resolveIcons(data.items.map((it) => getIconKey(it)));
         }
       } catch (err) {
         console.error("Search error:", err);
@@ -370,7 +470,7 @@ createApp({
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
         searchItems(modal.value.searchQuery);
-      }, 250);
+      }, 200);
     }
 
     function selectItem(item) {
@@ -397,27 +497,32 @@ createApp({
       const idx = modal.value.slotIndex;
       const targetSlot = inventory.value[idx];
       const appliedId = currentComputedId.value;
+      const it = modal.value.selectedItem;
 
       targetSlot.id = appliedId;
-      targetSlot.name = modal.value.selectedItem.name;
-      targetSlot.category = modal.value.selectedItem.category;
+      targetSlot.name = it.nameId || it.name;
+      targetSlot.nameId = it.nameId || it.name;
+      targetSlot.nameEn = it.nameEn || it.name;
+      targetSlot.descId = it.descId || "";
+      targetSlot.descEn = it.descEn || "";
+      targetSlot.iconKey = getIconKey(it);
+      targetSlot.category = it.category;
       targetSlot.quantity = Math.max(
         1,
         Math.min(999, Number(modal.value.quantity) || 1),
       );
       targetSlot.quality =
-        modal.value.selectedItem.qualities &&
-        modal.value.selectedItem.qualities[modal.value.selectedQuality]
+        it.qualities && it.qualities[modal.value.selectedQuality]
           ? modal.value.selectedQuality
           : "base";
-      targetSlot.hasQualities = modal.value.selectedItem.hasQualities;
-      targetSlot.availableQualities = modal.value.selectedItem.qualities;
+      targetSlot.hasQualities = it.hasQualities;
+      targetSlot.availableQualities = it.qualities;
       targetSlot.empty = false;
 
-      resolveIcons([targetSlot.name]);
+      resolveIcons([targetSlot.iconKey]);
       closeSlotEditor();
       showToast(
-        `Slot #${idx + 1} diperbarui: ${targetSlot.name} (${targetSlot.quantity})`,
+        `Slot #${idx + 1} diperbarui: ${getItemName(targetSlot)} (${targetSlot.quantity})`,
       );
     }
 
@@ -426,6 +531,11 @@ createApp({
       const targetSlot = inventory.value[idx];
       targetSlot.id = "";
       targetSlot.name = "(Kosong)";
+      targetSlot.nameId = "(Kosong)";
+      targetSlot.nameEn = "(Empty)";
+      targetSlot.descId = "";
+      targetSlot.descEn = "";
+      targetSlot.iconKey = "";
       targetSlot.category = "Empty";
       targetSlot.quantity = 0;
       targetSlot.quality = "base";
@@ -461,6 +571,165 @@ createApp({
       showToast(`Merit Points ditambah +${amount.toLocaleString()}`);
     }
 
+    function setMaxBag() {
+      player.value.inventoryLimit = 40;
+      showToast("Kapasitas tas diatur ke maksimum (40 Slot).");
+    }
+
+    function setTownRankPreset(rankVal, pointsVal, label) {
+      world.value.townRank = rankVal;
+      world.value.overallTownPoint = pointsVal;
+      world.value.currentTownPoint = pointsVal;
+      showToast(
+        `Town Rank diatur ke ${label} (${pointsVal.toLocaleString()} poin).`,
+      );
+    }
+
+    function isWaypointUnlocked(id) {
+      return (
+        Array.isArray(world.value.waypoints) &&
+        world.value.waypoints.includes(id)
+      );
+    }
+
+    function toggleWaypoint(id) {
+      if (!Array.isArray(world.value.waypoints)) {
+        world.value.waypoints = [];
+      }
+      const idx = world.value.waypoints.indexOf(id);
+      if (idx === -1) {
+        world.value.waypoints.push(id);
+      } else {
+        world.value.waypoints.splice(idx, 1);
+      }
+    }
+
+    function unlockAllWaypoints() {
+      const existing = Array.isArray(world.value.waypoints)
+        ? world.value.waypoints
+        : [];
+      const allIds = allWaypoints.value.map((w) => w.id);
+      world.value.waypoints = Array.from(new Set([...existing, ...allIds]));
+      showToast(`Seluruh ${allIds.length} titik teleport berhasil dibuka.`);
+    }
+
+    const filteredNpcs = computed(() => {
+      const q = (npcSearch.value || "").toLowerCase().trim();
+      return npcs.value.filter((n) => {
+        if (npcFilter.value === "romanceable" && !n.isRomanceable) return false;
+        if (npcFilter.value === "townfolk" && n.isRomanceable) return false;
+        if (!q) return true;
+        return (
+          (n.name || "").toLowerCase().includes(q) ||
+          (n.id || "").toLowerCase().includes(q)
+        );
+      });
+    });
+
+    const npcTotalPages = computed(() =>
+      Math.max(1, Math.ceil(filteredNpcs.value.length / npcPerPage.value)),
+    );
+
+    const safeNpcPage = computed(() =>
+      Math.min(Math.max(1, npcPage.value), npcTotalPages.value),
+    );
+
+    const paginatedNpcs = computed(() => {
+      const start = (safeNpcPage.value - 1) * npcPerPage.value;
+      return filteredNpcs.value.slice(start, start + npcPerPage.value);
+    });
+
+    const npcRangeStart = computed(() =>
+      filteredNpcs.value.length === 0
+        ? 0
+        : (safeNpcPage.value - 1) * npcPerPage.value + 1,
+    );
+
+    const npcRangeEnd = computed(() =>
+      Math.min(filteredNpcs.value.length, safeNpcPage.value * npcPerPage.value),
+    );
+
+    const npcPageNumbers = computed(() => {
+      const total = npcTotalPages.value;
+      const cur = safeNpcPage.value;
+      const maxButtons = 7;
+      if (total <= maxButtons) {
+        return Array.from({ length: total }, (_, i) => i + 1);
+      }
+      let start = Math.max(1, cur - 3);
+      let end = Math.min(total, start + maxButtons - 1);
+      if (end - start + 1 < maxButtons) {
+        start = Math.max(1, end - maxButtons + 1);
+      }
+      const pages = [];
+      for (let i = start; i <= end; i++) pages.push(i);
+      return pages;
+    });
+
+    function setNpcFilter(f) {
+      npcFilter.value = f;
+      npcPage.value = 1;
+    }
+
+    function onNpcSearchInput() {
+      npcPage.value = 1;
+    }
+
+    function goToNpcPage(p) {
+      npcPage.value = Math.max(
+        1,
+        Math.min(npcTotalPages.value, Number(p) || 1),
+      );
+    }
+
+    function setNpcPerPage(size) {
+      npcPerPage.value = Number(size) || 12;
+      npcPage.value = 1;
+    }
+
+    function setNpcHearts(npc, heartsCount) {
+      const pts = Math.max(0, Math.min(4000, Number(heartsCount) * 400));
+      npc.heartPoints = pts;
+      npc.hearts = Math.min(10, Math.floor(pts / 400));
+    }
+
+    function onNpcPointsInput(npc) {
+      const pts = Math.max(0, Math.min(4000, Number(npc.heartPoints) || 0));
+      npc.heartPoints = pts;
+      npc.hearts = Math.min(10, Math.floor(pts / 400));
+    }
+
+    function resetNpcGift(npc) {
+      npc.weeklyGiftsCount = 0;
+      npc.dailyGiftLeft = 1;
+      showToast(`Kuota hadiah ${npc.name} berhasil direset.`);
+    }
+
+    function maxAllNpcHearts(romanceableOnly = false) {
+      let count = 0;
+      for (const n of npcs.value) {
+        if (romanceableOnly && !n.isRomanceable) continue;
+        n.heartPoints = 4000;
+        n.hearts = 10;
+        count++;
+      }
+      showToast(
+        romanceableOnly
+          ? `${count} karakter Romanceable diatur ke 10 Hati (4.000 poin).`
+          : `Seluruh ${count} NPC diatur ke 10 Hati (4.000 poin).`,
+      );
+    }
+
+    function resetAllNpcGifts() {
+      for (const n of npcs.value) {
+        n.weeklyGiftsCount = 0;
+        n.dailyGiftLeft = 1;
+      }
+      showToast(
+        `Kuota hadiah mingguan dan harian seluruh ${npcs.value.length} NPC berhasil direset.`,
+      );
+    }
+
     return {
       fileLoaded,
       fileName,
@@ -472,8 +741,23 @@ createApp({
       gameSavePath,
       pathCopied,
       fileInputRef,
+      itemLang,
       activeTab,
       player,
+      world,
+      allWaypoints,
+      npcs,
+      npcSearch,
+      npcFilter,
+      npcPage,
+      npcPerPage,
+      filteredNpcs,
+      paginatedNpcs,
+      npcTotalPages,
+      safeNpcPage,
+      npcRangeStart,
+      npcRangeEnd,
+      npcPageNumbers,
       inventory,
       toast,
       modal,
@@ -484,6 +768,9 @@ createApp({
       currentComputedId,
       iconMap,
       iconStats,
+      getIconKey,
+      getItemName,
+      getItemDesc,
       fetchIconStats,
       clearIconCache,
       onImageLoad,
@@ -508,6 +795,20 @@ createApp({
       addQty,
       addGold,
       addMerit,
+      setMaxBag,
+      setTownRankPreset,
+      isWaypointUnlocked,
+      toggleWaypoint,
+      unlockAllWaypoints,
+      setNpcFilter,
+      onNpcSearchInput,
+      goToNpcPage,
+      setNpcPerPage,
+      setNpcHearts,
+      onNpcPointsInput,
+      resetNpcGift,
+      maxAllNpcHearts,
+      resetAllNpcGifts,
     };
   },
 }).mount("#app");
