@@ -1,1 +1,258 @@
-{}
+{
+  "Aging barrel": {
+    "filename": "Aging_barrel.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/d/de/Aging_barrel.png/revision/latest?cb=20221019190556",
+    "updatedAt": 1790199526004
+  },
+  "Murex": {
+    "filename": "Murex.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/1/19/Murex.png/revision/latest?cb=20221017195718",
+    "updatedAt": 1790199526006
+  },
+  "Tough meat": {
+    "filename": "Tough_meat.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/0/0e/Tough_meat.png/revision/latest?cb=20221022235009",
+    "updatedAt": 1790199526006
+  },
+  "Resin": {
+    "filename": "Resin.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/2/2c/Resin.png/revision/latest?cb=20221020195726",
+    "updatedAt": 1790199526011
+  },
+  "Osmium Fishing Pole": {
+    "filename": "Osmium_Fishing_Pole.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/b/b2/Osmium_fishing_pole.png/revision/latest?cb=20230523083829",
+    "updatedAt": 1790199526011
+  },
+  "Diamond": {
+    "filename": "Diamond.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/e/ea/Diamond.png/revision/latest?cb=20221016022950",
+    "updatedAt": 1790199526013
+  },
+  "Animal Whistle": {
+    "filename": "Animal_Whistle.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/d/db/Animal_whistle.png/revision/latest?cb=20230519045209",
+    "updatedAt": 1790199526024
+  },
+  "Osmium Scythe": {
+    "filename": "Osmium_Scythe.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/2/26/Osmium_scythe.png/revision/latest?cb=20230523092837",
+    "updatedAt": 1790199526025
+  },
+  "Auto petter": {
+    "filename": "Auto_petter.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/7/7d/Auto_petter.png/revision/latest?cb=20230910153349",
+    "updatedAt": 1790199526047
+  },
+  "Strawberry": {
+    "filename": "Strawberry.png",
+    "cachedAt": 1790199558320,
+    "size": 23944
+  },
+  "Slime goop": {
+    "filename": "Slime_goop.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/d/df/Slime_goop.png/revision/latest?cb=20221020204812",
+    "updatedAt": 1790199526053
+  },
+  "Silky fur": {
+    "filename": "Silky_fur.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/a/a0/Silky_fur.png/revision/latest?cb=20230429011907",
+    "updatedAt": 1790199526057
+  },
+  "Arame": {
+    "filename": "Arame.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/4/44/Arame.png/revision/latest?cb=20221110051453",
+    "updatedAt": 1790199526064
+  },
+  "Auto chest": {
+    "filename": "Auto_chest.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/7/70/Automation_chest.png/revision/latest?cb=20230910153529",
+    "updatedAt": 1790199526066
+  },
+  "Hardwood": {
+    "filename": "Hardwood.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/e/ed/Hardwood.png/revision/latest?cb=20221020194050",
+    "updatedAt": 1790199526069
+  },
+  "Monarch caterpillar": {
+    "filename": "Monarch_caterpillar.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/0/08/Monarch_caterpillar.png/revision/latest?cb=20221015223652",
+    "updatedAt": 1790199526074
+  },
+  "Ultimate scarecrow": {
+    "filename": "Ultimate_scarecrow.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/b/b5/Ultimate_scarecrow.png/revision/latest?cb=20230910154407",
+    "updatedAt": 1790199526074
+  },
+  "Medium fish bait": {
+    "filename": "Medium_fish_bait.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/f/fd/Medium_fish_bait.png/revision/latest?cb=20230526212010",
+    "updatedAt": 1790199526086
+  },
+  "Pink diamond": {
+    "filename": "Pink_diamond.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/5/53/Pink_diamond.png/revision/latest?cb=20221016023239",
+    "updatedAt": 1790199526096
+  },
+  "Large fish bait": {
+    "filename": "Large_fish_bait.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/1/14/Large_fish_bait.png/revision/latest?cb=20230302115849",
+    "updatedAt": 1790199526106
+  },
+  "Scrap": {
+    "filename": "Scrap.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/b/b8/Scrap.png/revision/latest?cb=20221020193056",
+    "updatedAt": 1790199526277
+  },
+  "Osmium kelp": {
+    "filename": "Osmium_kelp.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/6/6c/Osmium_kelp.png/revision/latest?cb=20221027172709",
+    "updatedAt": 1790199559901
+  },
+  "Osmium ore": {
+    "filename": "Osmium_ore.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/9/9a/Osmium_ore.png/revision/latest?cb=20230323072533",
+    "updatedAt": 1790199559919
+  },
+  "Osmium Lumina Wand": {
+    "filename": "Osmium_Lumina_Wand.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/5/5a/Osmium_lumina_wand.png/revision/latest?cb=20240802021447",
+    "updatedAt": 1790199559924
+  },
+  "Osmium Watering Can": {
+    "filename": "Osmium_Watering_Can.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/f/f4/Osmium_watering_can.png/revision/latest?cb=20221025084544",
+    "updatedAt": 1790199559942
+  },
+  "Osmium Hoe": {
+    "filename": "Osmium_Hoe.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/4/4d/Osmium_hoe.png/revision/latest?cb=20221025000519",
+    "updatedAt": 1790199559946
+  },
+  "Osmium kelp essence": {
+    "filename": "Osmium_kelp_essence.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/9/99/Osmium_kelp_essence.png/revision/latest?cb=20221020195721",
+    "updatedAt": 1790199559954
+  },
+  "Osmium Axe": {
+    "filename": "Osmium_Axe.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/6/67/Osmium_axe.png/revision/latest?cb=20221025084610",
+    "updatedAt": 1790199559955
+  },
+  "Osmium Pickaxe": {
+    "filename": "Osmium_Pickaxe.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/f/f2/Osmium_pickaxe.png/revision/latest?cb=20221025084557",
+    "updatedAt": 1790199559956
+  },
+  "Osmium bar": {
+    "filename": "Osmium_bar.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/9/9d/Osmium_bar.png/revision/latest?cb=20230323072616",
+    "updatedAt": 1790199559970
+  },
+  "Osmium Bug Net": {
+    "filename": "Osmium_Bug_Net.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/f/f8/Osmium_bug_net.png/revision/latest?cb=20230523085139",
+    "updatedAt": 1790199559989
+  },
+  "Osmium hay": null,
+  "Osmium meteor": null,
+  "Osmium hammer": null,
+  "Osmium sapling": null,
+  "Osmium seedling": null,
+  "Osmium seeds": null,
+  "Moonspore seeds": {
+    "filename": "Moonspore_seeds.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/d/d6/Moonspore_seeds.png/revision/latest?cb=20241220161524",
+    "updatedAt": 1790199562990
+  },
+  "Ocean Explorer scarecrow": {
+    "filename": "Ocean_Explorer_scarecrow.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/4/41/Ocean_explorer_scarecrow.png/revision/latest?cb=20230913024656",
+    "updatedAt": 1790199563006
+  },
+  "Explorer hat": {
+    "filename": "Explorer_hat.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/d/d0/Explorer_hat.png/revision/latest?cb=20231212013219",
+    "updatedAt": 1790199563014
+  },
+  "Ocean Explorer chest": {
+    "filename": "Ocean_Explorer_chest.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/b/b9/Ocean_explorer_chest.png/revision/latest?cb=20230913024646",
+    "updatedAt": 1790199563032
+  },
+  "Shore Naganian garments": {
+    "filename": "Shore_Naganian_garments.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/2/2f/Shore_naganian_garments.png/revision/latest?cb=20240921021107",
+    "updatedAt": 1790199563036
+  },
+  "Cream-colored blinds": {
+    "filename": "Cream-colored_blinds.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/6/6a/Cream-colored_blinds.png/revision/latest?cb=20230530133319",
+    "updatedAt": 1790199563042
+  },
+  "Solar core": {
+    "filename": "Solar_core.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/e/e3/Solar_core.png/revision/latest?cb=20240802025219",
+    "updatedAt": 1790199563053
+  },
+  "Morel chips": {
+    "filename": "Morel_chips.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/8/86/Seafood_jerky.png/revision/latest?cb=20230302114727",
+    "updatedAt": 1790199563054
+  },
+  "Bronze ore": {
+    "filename": "Bronze_ore.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/f/f2/Bronze_ore.png/revision/latest?cb=20221019183622",
+    "updatedAt": 1790199563055
+  },
+  "Ocean Explorer outfit": {
+    "filename": "Ocean_Explorer_outfit.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/3/35/Ocean_explorer_outfit.png/revision/latest?cb=20230913024634",
+    "updatedAt": 1790199563086
+  },
+  "Split-colored lobster": {
+    "filename": "Split-colored_lobster.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/d/d6/Split-colored_lobster.png/revision/latest?cb=20230504131556",
+    "updatedAt": 1790199563097
+  },
+  "Janetta forester butterfly": {
+    "filename": "Janetta_forester_butterfly.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/e/e3/Janetta_forester_butterfly.png/revision/latest?cb=20221015222126",
+    "updatedAt": 1790199563104
+  },
+  "Silver ore": {
+    "filename": "Silver_ore.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/3/34/Silver_ore.png/revision/latest?cb=20221019183636",
+    "updatedAt": 1790199563157
+  },
+  "Morel": {
+    "filename": "Morel.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/b/b1/Morel.png/revision/latest?cb=20221016051731",
+    "updatedAt": 1790199563181
+  },
+  "Gold ore": {
+    "filename": "Gold_ore.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/9/91/Gold_ore.png/revision/latest?cb=20221019183628",
+    "updatedAt": 1790199563251
+  },
+  "Vitamin drink": {
+    "filename": "Vitamin_drink.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/8/89/Vitamin_drink.png/revision/latest?cb=20221030014942",
+    "updatedAt": 1790200471389
+  },
+  "Gold Bug Net": {
+    "filename": "Gold_Bug_Net.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/8/88/Gold_bug_net.png/revision/latest?cb=20230523082929",
+    "updatedAt": 1790200471433
+  },
+  "Silver Hoe": {
+    "filename": "Silver_Hoe.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/a/a3/Silver_hoe.png/revision/latest?cb=20221025000443",
+    "updatedAt": 1790200471434
+  },
+  "Pipevine swallowtail butterfly": {
+    "filename": "Pipevine_swallowtail_butterfly.png",
+    "cdnUrl": "https://static.wikia.nocookie.net/coralisland/images/5/58/Pipevine_swallowtail_butterfly.png/revision/latest?cb=20221016032218",
+    "updatedAt": 1790200471516
+  }
+}
