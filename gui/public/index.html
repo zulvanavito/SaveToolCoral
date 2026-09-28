@@ -4,9 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SaveToolCoral: Coral Island Save Editor</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Custom Theme Stylesheet -->
     <link rel="stylesheet" href="style.css" />
     <script>
       tailwind.config = {
@@ -14,16 +12,16 @@
           extend: {
             colors: {
               coral: {
-                base: "#eff5f5", // Sea mist white
-                card: "#ffffff", // Crisp surface
-                dark: "#116379", // Deep ocean teal
-                darker: "#0c4959", // Darker teal for active/hover text
-                muted: "#4d7a86", // Secondary body text
-                sky: "#77c6e1", // Lagoon sky
-                azure: "#0aa0eb", // Tropical azure
-                seafoam: "#3fd0e7", // Seafoam cyan
-                border: "#cfe3e7", // Clean light border
-                subtle: "#e0eff1", // Subtle card backgrounds
+                base: "#eff5f5",
+                card: "#ffffff",
+                dark: "#116379",
+                darker: "#0c4959",
+                muted: "#4d7a86",
+                sky: "#77c6e1",
+                azure: "#0aa0eb",
+                seafoam: "#3fd0e7",
+                border: "#cfe3e7",
+                subtle: "#e0eff1",
               },
             },
           },
@@ -35,7 +33,6 @@
     class="min-h-screen bg-coral-base text-coral-dark flex flex-col selection:bg-coral-azure selection:text-white"
   >
     <div id="app" class="flex-1 flex flex-col">
-      <!-- Hidden File Input for File Picker -->
       <input
         type="file"
         ref="fileInputRef"
@@ -46,7 +43,7 @@
 
       <!-- Header / Topbar -->
       <header
-        class="bg-coral-card border-b border-coral-border sticky top-0 z-30 px-6 py-3.5 shadow-sm"
+        class="bg-coral-card border-b border-coral-border sticky top-0 z-30 px-4 sm:px-6 py-3.5 shadow-sm"
       >
         <div
           class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4"
@@ -78,9 +75,9 @@
                   SaveToolCoral
                 </h1>
                 <span
-                  class="text-[11px] px-2 py-0.5 rounded bg-coral-base text-coral-muted border border-coral-border font-medium"
+                  class="text-[11px] px-2 py-0.5 rounded-md bg-coral-base text-coral-dark border border-coral-border font-semibold"
                 >
-                  v1.2
+                  v1.3
                 </span>
               </div>
               <p class="text-xs text-coral-muted">
@@ -89,108 +86,126 @@
             </div>
           </div>
 
-          <!-- Active File Info & Primary Actions (Shown when file is loaded) -->
-          <div v-if="fileLoaded" class="flex flex-wrap items-center gap-3">
-            <!-- Active File Badge -->
+          <!-- Right Controls -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Language Switcher for Item Names (ID / EN) -->
             <div
-              class="flex items-center gap-2 bg-coral-base px-3 py-1.5 rounded-lg border border-coral-border"
+              class="flex items-center bg-coral-base p-1 rounded-lg border border-coral-border text-xs font-semibold"
+              role="group"
+              aria-label="Bahasa Nama Item"
             >
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span class="text-xs font-mono font-bold text-coral-dark"
-                >{{ fileName }}</span
-              >
-              <span class="text-[11px] font-mono text-coral-muted"
-                >({{ (fileSize / 1024).toFixed(0) }} KB)</span
-              >
-            </div>
-
-            <!-- Cache Stats Badge -->
-            <div
-              class="flex items-center gap-2 bg-coral-base px-2.5 py-1.5 rounded-lg border border-coral-border text-xs text-coral-muted"
-            >
-              <svg
-                class="w-3.5 h-3.5 text-coral-sky"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                <circle cx="9" cy="9" r="2" />
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-              </svg>
-              <span class="text-[11px]">
-                Cache:
-                <strong class="font-mono text-coral-dark"
-                  >{{ iconStats.count }}</strong
-                >
-                ikon
-                <span
-                  v-if="iconStats.count > 0"
-                  class="font-mono text-coral-muted"
-                  >({{ iconStats.totalKB }} KB)</span
-                >
-              </span>
               <button
-                v-if="iconStats.count > 0"
-                @click="clearIconCache"
-                title="Bersihkan cache gambar lokal"
-                class="text-[10px] text-coral-muted hover:text-red-600 font-medium underline underline-offset-2 ml-1"
+                type="button"
+                @click="itemLang = 'id'"
+                :class="itemLang === 'id' ? 'bg-coral-dark text-white shadow-2xs' : 'text-coral-muted hover:text-coral-dark'"
+                class="px-2.5 py-1 rounded-md transition"
               >
-                Reset
+                Item: ID
+              </button>
+              <button
+                type="button"
+                @click="itemLang = 'en'"
+                :class="itemLang === 'en' ? 'bg-coral-dark text-white shadow-2xs' : 'text-coral-muted hover:text-coral-dark'"
+                class="px-2.5 py-1 rounded-md transition"
+              >
+                EN
               </button>
             </div>
 
-            <!-- Change File Button -->
-            <button
-              @click="triggerFileInput"
-              class="px-3 py-1.5 text-xs font-medium text-coral-dark bg-white hover:bg-coral-base border border-coral-border rounded-lg transition"
-            >
-              Ganti File
-            </button>
+            <template v-if="fileLoaded">
+              <!-- Active File Badge -->
+              <div
+                class="flex items-center gap-2 bg-coral-base px-3 py-1.5 rounded-lg border border-coral-border"
+              >
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span class="text-xs font-mono font-bold text-coral-dark"
+                  >{{ fileName }}</span
+                >
+                <span class="text-[11px] font-mono text-coral-muted"
+                  >({{ (fileSize / 1024).toFixed(0) }} KB)</span
+                >
+              </div>
 
-            <!-- Download Button (Primary CTA) -->
-            <button
-              @click="downloadSave"
-              :disabled="saving"
-              class="flex items-center gap-2 bg-coral-azure hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-xs transition shadow-sm disabled:opacity-50"
-            >
-              <svg
-                v-if="saving"
-                class="w-4 h-4 animate-spin text-white"
-                fill="none"
-                viewBox="0 0 24 24"
+              <!-- Cache Stats Badge -->
+              <div
+                class="hidden sm:flex items-center gap-2 bg-coral-base px-2.5 py-1.5 rounded-lg border border-coral-border text-xs text-coral-muted"
               >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
+                <span class="text-[11px]">
+                  Cache:
+                  <strong class="font-mono text-coral-dark"
+                    >{{ iconStats.count }}</strong
+                  >
+                  ikon
+                  <span
+                    v-if="iconStats.count > 0"
+                    class="font-mono text-coral-muted"
+                    >({{ iconStats.totalKB }} KB)</span
+                  >
+                </span>
+                <button
+                  v-if="iconStats.count > 0"
+                  type="button"
+                  @click="clearIconCache"
+                  title="Bersihkan cache gambar lokal"
+                  class="text-[11px] text-coral-dark hover:text-red-700 font-semibold underline underline-offset-2 ml-1"
+                >
+                  Reset
+                </button>
+              </div>
+
+              <!-- Change File Button -->
+              <button
+                type="button"
+                @click="triggerFileInput"
+                class="px-3 py-2 text-xs font-semibold text-coral-dark bg-white hover:bg-coral-base border border-coral-border rounded-lg transition"
+              >
+                Ganti File
+              </button>
+
+              <!-- Download Button (Primary CTA) -->
+              <button
+                type="button"
+                @click="downloadSave"
+                :disabled="saving"
+                class="flex items-center gap-2 bg-coral-azure hover:bg-coral-dark text-white px-4 py-2 rounded-lg font-bold text-xs transition shadow-sm disabled:opacity-50"
+              >
+                <svg
+                  v-if="saving"
+                  class="w-4 h-4 animate-spin text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                <svg
+                  v-else
+                  class="w-4 h-4 text-white"
+                  fill="none"
                   stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
-              <svg
-                v-else
-                class="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                ></path>
-              </svg>
-              <span>Unduh File (.sav)</span>
-            </button>
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  ></path>
+                </svg>
+                <span>Unduh File (.sav)</span>
+              </button>
+            </template>
           </div>
         </div>
       </header>
@@ -201,18 +216,22 @@
         class="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col justify-center"
       >
         <div class="space-y-6">
-          <!-- Big Dropzone Container -->
           <div
             @dragover="onDragOver"
             @dragleave="onDragLeave"
             @drop="onFileDrop"
             @click="triggerFileInput"
-            class="dropzone border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer select-none transition bg-coral-card border-coral-border hover:border-coral-azure"
+            tabindex="0"
+            role="button"
+            aria-label="Unggah file save game .sav"
+            @keydown.enter.prevent="triggerFileInput"
+            @keydown.space.prevent="triggerFileInput"
+            class="dropzone border-2 border-dashed rounded-xl p-10 text-center cursor-pointer select-none transition bg-coral-card border-coral-border hover:border-coral-azure"
             :class="{ 'drag-active': isDragging }"
           >
             <div class="max-w-md mx-auto space-y-4">
               <div
-                class="w-16 h-16 mx-auto rounded-full bg-coral-base border border-coral-border flex items-center justify-center text-coral-dark"
+                class="w-16 h-16 mx-auto rounded-xl bg-coral-base border border-coral-border flex items-center justify-center text-coral-dark"
               >
                 <svg
                   class="w-8 h-8 text-coral-dark"
@@ -231,14 +250,14 @@
 
               <div class="space-y-1.5">
                 <h2 class="text-lg font-bold text-coral-dark">
-                  Tarik & Lepas File Save Game (.sav) ke Sini
+                  Tarik dan Lepas File Save Game (.sav) ke Sini
                 </h2>
                 <p class="text-xs text-coral-muted leading-relaxed">
                   Seret file
                   <span class="font-mono font-semibold text-coral-dark"
                     >ManualSave0.sav</span
                   >
-                  atau klik kotak ini untuk memilih dari komputer Anda.
+                  atau klik area ini untuk memilih file dari komputer Anda.
                 </p>
               </div>
 
@@ -246,7 +265,7 @@
                 <button
                   type="button"
                   @click.stop="triggerFileInput"
-                  class="bg-coral-azure hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition shadow-sm"
+                  class="bg-coral-azure hover:bg-coral-dark text-white px-5 py-2.5 rounded-lg text-xs font-bold transition shadow-sm"
                 >
                   Pilih File (.sav)
                 </button>
@@ -254,36 +273,36 @@
             </div>
           </div>
 
-          <!-- Quick Loader for Workspace File (Optional helper) -->
           <div v-if="hasWorkspaceFile" class="text-center">
             <button
+              type="button"
               @click="loadWorkspaceSave"
               :disabled="uploading"
-              class="text-xs text-coral-muted hover:text-coral-dark underline underline-offset-4 transition"
+              class="text-xs font-semibold text-coral-dark hover:text-coral-azure underline underline-offset-4 transition py-2 px-3"
             >
               Atau buka file
-              <span class="font-mono font-medium">ManualSave0.sav</span> yang
-              sudah ada di workspace proyek
+              <span class="font-mono font-bold">ManualSave0.sav</span> yang
+              tersedia di folder proyek
             </button>
           </div>
 
-          <!-- Location Guide Card -->
           <div
             class="bg-coral-card border border-coral-border rounded-xl p-5 shadow-sm space-y-3"
           >
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <div class="text-xs font-bold text-coral-dark">
-                Di Mana Letak Folder Save Game Coral Island?
+                Lokasi Folder Save Game Coral Island (Windows)
               </div>
               <button
+                type="button"
                 @click="copyGamePath"
-                class="text-xs font-semibold px-2.5 py-1 rounded bg-coral-base hover:bg-coral-subtle border border-coral-border text-coral-dark transition"
+                class="text-xs font-semibold px-3 py-1.5 rounded-md bg-coral-base hover:bg-coral-subtle border border-coral-border text-coral-dark transition"
               >
-                {{ pathCopied ? 'Tersalin!' : 'Salin Path Folder' }}
+                {{ pathCopied ? 'Tersalin ke Clipboard' : 'Salin Path Folder' }}
               </button>
             </div>
             <div
-              class="text-xs font-mono bg-coral-base p-2.5 rounded-lg border border-coral-border text-coral-muted break-all select-all"
+              class="text-xs font-mono bg-coral-base p-2.5 rounded-lg border border-coral-border text-coral-dark break-all select-all"
             >
               {{ gameSavePath ||
               '%LOCALAPPDATA%\\ProjectCoral\\Saved\\SaveGames\\World_1' }}
@@ -291,10 +310,10 @@
             <p class="text-[11px] text-coral-muted">
               Tekan
               <kbd
-                class="px-1.5 py-0.5 rounded bg-coral-base border border-coral-border font-mono text-[10px]"
+                class="px-1.5 py-0.5 rounded-md bg-coral-base border border-coral-border font-mono text-[10px] text-coral-dark"
                 >Win + R</kbd
-              >, tempelkan path di atas, lalu tekan Enter untuk langsung membuka
-              folder save game Anda di Windows Explorer.
+              >, tempelkan path di atas, lalu tekan Enter untuk membuka folder
+              save game di Windows Explorer.
             </p>
           </div>
         </div>
@@ -303,26 +322,53 @@
       <!-- SCREEN 2: ACTIVE EDITOR (When file is loaded) -->
       <div v-else class="flex-1 flex flex-col">
         <!-- Navigation Tabs -->
-        <div class="border-b border-coral-border bg-coral-card/60">
-          <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
-            <nav class="flex space-x-6 text-sm font-semibold">
+        <div class="border-b border-coral-border bg-coral-card">
+          <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-2"
+          >
+            <nav
+              class="flex space-x-2 sm:space-x-6 text-xs sm:text-sm font-semibold overflow-x-auto"
+              aria-label="Tab Editor"
+            >
               <button
+                type="button"
                 @click="activeTab = 'inventory'"
-                :class="activeTab === 'inventory' ? 'border-coral-azure text-coral-azure' : 'border-transparent text-coral-muted hover:text-coral-dark'"
-                class="py-3 px-1 border-b-2 flex items-center gap-2 transition"
+                :class="activeTab === 'inventory' ? 'border-coral-azure text-coral-dark font-bold' : 'border-transparent text-coral-muted hover:text-coral-dark'"
+                class="py-3.5 px-2 border-b-2 flex items-center gap-2 transition whitespace-nowrap"
               >
                 <span>Tas Pemain (40 Slot)</span>
               </button>
               <button
+                type="button"
                 @click="activeTab = 'player'"
-                :class="activeTab === 'player' ? 'border-coral-azure text-coral-azure' : 'border-transparent text-coral-muted hover:text-coral-dark'"
-                class="py-3 px-1 border-b-2 flex items-center gap-2 transition"
+                :class="activeTab === 'player' ? 'border-coral-azure text-coral-dark font-bold' : 'border-transparent text-coral-muted hover:text-coral-dark'"
+                class="py-3.5 px-2 border-b-2 flex items-center gap-2 transition whitespace-nowrap"
               >
                 <span>Profil dan Karakter</span>
               </button>
+              <button
+                type="button"
+                @click="activeTab = 'world'"
+                :class="activeTab === 'world' ? 'border-coral-azure text-coral-dark font-bold' : 'border-transparent text-coral-muted hover:text-coral-dark'"
+                class="py-3.5 px-2 border-b-2 flex items-center gap-2 transition whitespace-nowrap"
+              >
+                <span>Dunia dan Kota</span>
+              </button>
+              <button
+                type="button"
+                @click="activeTab = 'npcs'"
+                :class="activeTab === 'npcs' ? 'border-coral-azure text-coral-dark font-bold' : 'border-transparent text-coral-muted hover:text-coral-dark'"
+                class="py-3.5 px-2 border-b-2 flex items-center gap-2 transition whitespace-nowrap"
+              >
+                <span>Relasi NPC</span>
+                <span
+                  class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-coral-base border border-coral-border text-coral-dark"
+                  >{{ npcs.length }}</span
+                >
+              </button>
             </nav>
 
-            <div class="text-xs text-coral-muted font-mono">
+            <div class="hidden md:block text-xs text-coral-muted font-mono">
               Status:
               <span class="text-emerald-700 font-semibold"
                 >Tervalidasi Biner</span
@@ -332,7 +378,7 @@
         </div>
 
         <!-- Main Content Area -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-6">
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
           <!-- TAB 1: INVENTORY EDITOR -->
           <div v-if="activeTab === 'inventory'" class="space-y-6">
             <!-- Guide & Quality Legend Banner -->
@@ -341,15 +387,19 @@
             >
               <div class="flex items-center gap-2 text-coral-muted">
                 <span class="font-bold text-coral-dark">Petunjuk:</span>
-                <span
-                  >Klik kotak slot untuk mengubah item, kuantitas, atau kualitas
-                  bintang. Slot peralatan kerja diberi proteksi label
-                  Tool.</span
-                >
+                <span>
+                  Klik kotak slot untuk mengubah item, kuantitas, atau kualitas
+                  bintang. Nama item ditampilkan dalam
+                  <strong class="text-coral-dark">
+                    {{ itemLang === 'id' ? 'Bahasa Indonesia' : 'Bahasa Inggris'
+                    }}
+                  </strong>
+                  (ubah melalui tombol ID/EN di kanan atas).
+                </span>
               </div>
-              <div class="flex items-center gap-3 font-medium">
-                <span class="flex items-center gap-1.5 text-coral-muted">
-                  <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+              <div class="flex flex-wrap items-center gap-3 font-semibold">
+                <span class="flex items-center gap-1.5 text-coral-dark">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
                   Normal
                 </span>
                 <span class="flex items-center gap-1.5 text-[#8c3c10]">
@@ -357,7 +407,7 @@
                   Bronze
                 </span>
                 <span class="flex items-center gap-1.5 text-[#405463]">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#94a3b8]"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#64748b]"></span>
                   Silver
                 </span>
                 <span class="flex items-center gap-1.5 text-[#8f6804]">
@@ -365,66 +415,84 @@
                   Gold
                 </span>
                 <span class="flex items-center gap-1.5 text-[#5b1c8f]">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#a855f7]"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#9333ea]"></span>
                   Osmium
                 </span>
               </div>
             </div>
 
-            <!-- ROW 1: HOTBAR (Slot 0-9) -->
-            <div class="space-y-2">
+            <!-- Inventory Rows Reusable Loop -->
+            <div
+              v-for="(rowGroup, rIdx) in [
+                { title: 'Baris 1: Hotbar (Slot 1 - 10)', subtitle: 'Slot Aktif di Layar Utama Game', slots: rowHotbar, isHotbar: true },
+                { title: 'Baris 2: Tas Dalam (Slot 11 - 20)', subtitle: '', slots: rowBag1, isHotbar: false },
+                { title: 'Baris 3: Tas Dalam (Slot 21 - 30)', subtitle: '', slots: rowBag2, isHotbar: false },
+                { title: 'Baris 4: Tas Dalam (Slot 31 - 40)', subtitle: '', slots: rowBag3, isHotbar: false }
+              ]"
+              :key="rIdx"
+              class="space-y-2 pt-1"
+            >
               <div
                 class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-coral-dark"
               >
-                <span>Baris 1: Hotbar (Slot 1 - 10)</span>
+                <span>{{ rowGroup.title }}</span>
                 <span
+                  v-if="rowGroup.subtitle"
                   class="text-coral-muted font-normal text-[11px] normal-case"
-                  >Slot Aktif di Layar Utama Game</span
                 >
+                  {{ rowGroup.subtitle }}
+                </span>
               </div>
+
               <div
-                class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2.5"
+                class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5"
               >
                 <div
-                  v-for="slot in rowHotbar"
+                  v-for="slot in rowGroup.slots"
                   :key="slot.slotIndex"
+                  tabindex="0"
+                  role="button"
+                  :aria-label="'Slot ' + (slot.slotIndex + 1) + ': ' + getItemName(slot)"
                   @click="openSlotEditor(slot)"
-                  class="slot-card slot-hotbar relative rounded-lg border p-2 flex flex-col justify-between min-h-[142px] cursor-pointer select-none"
+                  @keydown.enter.prevent="openSlotEditor(slot)"
+                  @keydown.space.prevent="openSlotEditor(slot)"
+                  class="slot-card relative rounded-lg border p-2.5 flex flex-col justify-between min-h-[146px] cursor-pointer select-none"
                   :class="[
+                    rowGroup.isHotbar ? 'slot-hotbar' : '',
                     slot.empty 
-                      ? 'bg-coral-card/50 border-dashed border-coral-sky/70 hover:border-coral-azure hover:bg-coral-card' 
-                      : 'bg-coral-card border-coral-border hover:border-coral-azure shadow-sm'
+                      ? 'bg-coral-card/60 border-dashed border-coral-sky hover:border-coral-azure hover:bg-coral-card' 
+                      : 'bg-coral-card border-coral-border hover:border-coral-azure shadow-2xs'
                   ]"
                 >
                   <!-- Top Badges -->
                   <div class="flex items-center justify-between gap-1">
                     <span
-                      class="text-[10px] font-mono font-medium text-coral-muted"
+                      class="text-[10px] font-mono font-semibold text-coral-muted"
                       >#{{ slot.slotIndex + 1 }}</span
                     >
                     <span
                       v-if="slot.quality === 'osmium'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-osmium"
+                      class="text-[9px] px-1.5 py-0.5 rounded-md font-bold badge-osmium"
                       >★★★★</span
                     >
                     <span
                       v-else-if="slot.quality === 'gold'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-gold"
+                      class="text-[9px] px-1.5 py-0.5 rounded-md font-bold badge-gold"
                       >★★★</span
                     >
                     <span
                       v-else-if="slot.quality === 'silver'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-silver"
+                      class="text-[9px] px-1.5 py-0.5 rounded-md font-bold badge-silver"
                       >★★</span
                     >
                     <span
                       v-else-if="slot.quality === 'bronze'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-bronze"
+                      class="text-[9px] px-1.5 py-0.5 rounded-md font-bold badge-bronze"
                       >★</span
                     >
                     <span
                       v-else-if="isTool(slot.id)"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-semibold badge-tool"
+                      class="text-[9px] px-1.5 py-0.5 rounded-md font-semibold badge-tool"
                       >Tool</span
                     >
                   </div>
@@ -438,364 +506,61 @@
                       class="w-10 h-10 flex items-center justify-center mb-1"
                     >
                       <img
-                        v-if="iconMap[slot.name]"
-                        :src="iconMap[slot.name]"
-                        :alt="slot.name"
+                        v-if="iconMap[getIconKey(slot)]"
+                        :src="iconMap[getIconKey(slot)]"
+                        :alt="getItemName(slot)"
                         class="w-9 h-9 object-contain item-icon item-icon-hover select-none"
                         loading="lazy"
                         referrerpolicy="no-referrer"
-                        @load="onImageLoad($event, slot.name)"
-                        @error="onImageError(slot.name)"
+                        @load="onImageLoad($event, getIconKey(slot))"
+                        @error="onImageError(getIconKey(slot))"
                       />
                       <div
                         v-else
-                        class="w-8 h-8 rounded bg-coral-base/80 border border-coral-border flex items-center justify-center text-[10px] font-bold text-coral-muted"
+                        class="w-8 h-8 rounded-md bg-coral-base border border-coral-border flex items-center justify-center text-[10px] font-bold text-coral-dark"
                       >
-                        {{ slot.name.substring(0, 2).toUpperCase() }}
+                        {{ getItemName(slot).substring(0, 2).toUpperCase() }}
                       </div>
                     </div>
                     <div
                       class="text-xs font-bold text-coral-dark line-clamp-1 leading-tight w-full"
+                      :title="getItemName(slot)"
                     >
-                      {{ slot.name }}
+                      {{ getItemName(slot) }}
                     </div>
                     <div
+                      v-if="itemLang === 'id' && slot.nameEn && slot.nameEn !== getItemName(slot)"
+                      class="text-[9px] text-coral-muted truncate w-full mt-0.5"
+                      :title="slot.nameEn"
+                    >
+                      {{ slot.nameEn }}
+                    </div>
+                    <div
+                      v-else
                       class="text-[9px] text-coral-muted font-mono mt-0.5 truncate w-full"
                     >
                       {{ slot.id }}
                     </div>
                   </div>
-                  <div v-else class="my-auto text-center text-coral-sky">
+                  <div v-else class="my-auto text-center">
                     <span
-                      class="text-xl block leading-none font-thin text-coral-sky/70"
+                      class="text-lg block leading-none font-normal text-coral-muted"
                       >+</span
                     >
                     <span class="text-[10px] text-coral-muted">Kosong</span>
                   </div>
 
                   <!-- Bottom Row: Quantity -->
-                  <div class="flex items-center justify-end">
-                    <span
-                      v-if="!slot.empty"
-                      class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-coral-base text-coral-dark border border-coral-border"
-                    >
-                      x{{ slot.quantity }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ROW 2: BAG ROW 1 (Slot 10-19) -->
-            <div class="space-y-2 pt-2">
-              <div
-                class="text-xs font-bold uppercase tracking-wider text-coral-dark"
-              >
-                <span>Baris 2: Tas Dalam (Slot 11 - 20)</span>
-              </div>
-              <div
-                class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2.5"
-              >
-                <div
-                  v-for="slot in rowBag1"
-                  :key="slot.slotIndex"
-                  @click="openSlotEditor(slot)"
-                  class="slot-card relative rounded-lg border p-2 flex flex-col justify-between min-h-[142px] cursor-pointer select-none"
-                  :class="[
-                    slot.empty 
-                      ? 'bg-coral-card/50 border-dashed border-coral-sky/70 hover:border-coral-azure hover:bg-coral-card' 
-                      : 'bg-coral-card border-coral-border hover:border-coral-azure shadow-sm'
-                  ]"
-                >
                   <div class="flex items-center justify-between gap-1">
                     <span
-                      class="text-[10px] font-mono font-medium text-coral-muted"
-                      >#{{ slot.slotIndex + 1 }}</span
-                    >
-                    <span
-                      v-if="slot.quality === 'osmium'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-osmium"
-                      >★★★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'gold'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-gold"
-                      >★★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'silver'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-silver"
-                      >★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'bronze'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-bronze"
-                      >★</span
-                    >
-                    <span
-                      v-else-if="isTool(slot.id)"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-semibold badge-tool"
-                      >Tool</span
-                    >
-                  </div>
-                  <div
-                    v-if="!slot.empty"
-                    class="my-auto text-center px-0.5 flex flex-col items-center justify-center"
-                  >
-                    <div
-                      class="w-10 h-10 flex items-center justify-center mb-1"
-                    >
-                      <img
-                        v-if="iconMap[slot.name]"
-                        :src="iconMap[slot.name]"
-                        :alt="slot.name"
-                        class="w-9 h-9 object-contain item-icon item-icon-hover select-none"
-                        loading="lazy"
-                        referrerpolicy="no-referrer"
-                        @load="onImageLoad($event, slot.name)"
-                        @error="onImageError(slot.name)"
-                      />
-                      <div
-                        v-else
-                        class="w-8 h-8 rounded bg-coral-base/80 border border-coral-border flex items-center justify-center text-[10px] font-bold text-coral-muted"
-                      >
-                        {{ slot.name.substring(0, 2).toUpperCase() }}
-                      </div>
-                    </div>
-                    <div
-                      class="text-xs font-bold text-coral-dark line-clamp-1 leading-tight w-full"
-                    >
-                      {{ slot.name }}
-                    </div>
-                    <div
-                      class="text-[9px] text-coral-muted font-mono mt-0.5 truncate w-full"
+                      v-if="!slot.empty"
+                      class="text-[9px] font-mono text-coral-muted truncate"
                     >
                       {{ slot.id }}
-                    </div>
-                  </div>
-                  <div v-else class="my-auto text-center text-coral-sky">
-                    <span
-                      class="text-xl block leading-none font-thin text-coral-sky/70"
-                      >+</span
-                    >
-                    <span class="text-[10px] text-coral-muted">Kosong</span>
-                  </div>
-                  <div class="flex items-center justify-end">
-                    <span
-                      v-if="!slot.empty"
-                      class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-coral-base text-coral-dark border border-coral-border"
-                    >
-                      x{{ slot.quantity }}
                     </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ROW 3: BAG ROW 2 (Slot 20-29) -->
-            <div class="space-y-2 pt-2">
-              <div
-                class="text-xs font-bold uppercase tracking-wider text-coral-dark"
-              >
-                <span>Baris 3: Tas Dalam (Slot 21 - 30)</span>
-              </div>
-              <div
-                class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2.5"
-              >
-                <div
-                  v-for="slot in rowBag2"
-                  :key="slot.slotIndex"
-                  @click="openSlotEditor(slot)"
-                  class="slot-card relative rounded-lg border p-2 flex flex-col justify-between min-h-[142px] cursor-pointer select-none"
-                  :class="[
-                    slot.empty 
-                      ? 'bg-coral-card/50 border-dashed border-coral-sky/70 hover:border-coral-azure hover:bg-coral-card' 
-                      : 'bg-coral-card border-coral-border hover:border-coral-azure shadow-sm'
-                  ]"
-                >
-                  <div class="flex items-center justify-between gap-1">
-                    <span
-                      class="text-[10px] font-mono font-medium text-coral-muted"
-                      >#{{ slot.slotIndex + 1 }}</span
-                    >
-                    <span
-                      v-if="slot.quality === 'osmium'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-osmium"
-                      >★★★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'gold'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-gold"
-                      >★★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'silver'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-silver"
-                      >★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'bronze'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-bronze"
-                      >★</span
-                    >
-                    <span
-                      v-else-if="isTool(slot.id)"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-semibold badge-tool"
-                      >Tool</span
-                    >
-                  </div>
-                  <div
-                    v-if="!slot.empty"
-                    class="my-auto text-center px-0.5 flex flex-col items-center justify-center"
-                  >
-                    <div
-                      class="w-10 h-10 flex items-center justify-center mb-1"
-                    >
-                      <img
-                        v-if="iconMap[slot.name]"
-                        :src="iconMap[slot.name]"
-                        :alt="slot.name"
-                        class="w-9 h-9 object-contain item-icon item-icon-hover select-none"
-                        loading="lazy"
-                        referrerpolicy="no-referrer"
-                        @load="onImageLoad($event, slot.name)"
-                        @error="onImageError(slot.name)"
-                      />
-                      <div
-                        v-else
-                        class="w-8 h-8 rounded bg-coral-base/80 border border-coral-border flex items-center justify-center text-[10px] font-bold text-coral-muted"
-                      >
-                        {{ slot.name.substring(0, 2).toUpperCase() }}
-                      </div>
-                    </div>
-                    <div
-                      class="text-xs font-bold text-coral-dark line-clamp-1 leading-tight w-full"
-                    >
-                      {{ slot.name }}
-                    </div>
-                    <div
-                      class="text-[9px] text-coral-muted font-mono mt-0.5 truncate w-full"
-                    >
-                      {{ slot.id }}
-                    </div>
-                  </div>
-                  <div v-else class="my-auto text-center text-coral-sky">
-                    <span
-                      class="text-xl block leading-none font-thin text-coral-sky/70"
-                      >+</span
-                    >
-                    <span class="text-[10px] text-coral-muted">Kosong</span>
-                  </div>
-                  <div class="flex items-center justify-end">
                     <span
                       v-if="!slot.empty"
-                      class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-coral-base text-coral-dark border border-coral-border"
-                    >
-                      x{{ slot.quantity }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ROW 4: BAG ROW 3 (Slot 30-39) -->
-            <div class="space-y-2 pt-2">
-              <div
-                class="text-xs font-bold uppercase tracking-wider text-coral-dark"
-              >
-                <span>Baris 4: Tas Dalam (Slot 31 - 40)</span>
-              </div>
-              <div
-                class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2.5"
-              >
-                <div
-                  v-for="slot in rowBag3"
-                  :key="slot.slotIndex"
-                  @click="openSlotEditor(slot)"
-                  class="slot-card relative rounded-lg border p-2 flex flex-col justify-between min-h-[142px] cursor-pointer select-none"
-                  :class="[
-                    slot.empty 
-                      ? 'bg-coral-card/50 border-dashed border-coral-sky/70 hover:border-coral-azure hover:bg-coral-card' 
-                      : 'bg-coral-card border-coral-border hover:border-coral-azure shadow-sm'
-                  ]"
-                >
-                  <div class="flex items-center justify-between gap-1">
-                    <span
-                      class="text-[10px] font-mono font-medium text-coral-muted"
-                      >#{{ slot.slotIndex + 1 }}</span
-                    >
-                    <span
-                      v-if="slot.quality === 'osmium'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-osmium"
-                      >★★★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'gold'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-gold"
-                      >★★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'silver'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-silver"
-                      >★★</span
-                    >
-                    <span
-                      v-else-if="slot.quality === 'bronze'"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-bold badge-bronze"
-                      >★</span
-                    >
-                    <span
-                      v-else-if="isTool(slot.id)"
-                      class="text-[9px] px-1.5 py-0.5 rounded font-semibold badge-tool"
-                      >Tool</span
-                    >
-                  </div>
-                  <div
-                    v-if="!slot.empty"
-                    class="my-auto text-center px-0.5 flex flex-col items-center justify-center"
-                  >
-                    <div
-                      class="w-10 h-10 flex items-center justify-center mb-1"
-                    >
-                      <img
-                        v-if="iconMap[slot.name]"
-                        :src="iconMap[slot.name]"
-                        :alt="slot.name"
-                        class="w-9 h-9 object-contain item-icon item-icon-hover select-none"
-                        loading="lazy"
-                        referrerpolicy="no-referrer"
-                        @load="onImageLoad($event, slot.name)"
-                        @error="onImageError(slot.name)"
-                      />
-                      <div
-                        v-else
-                        class="w-8 h-8 rounded bg-coral-base/80 border border-coral-border flex items-center justify-center text-[10px] font-bold text-coral-muted"
-                      >
-                        {{ slot.name.substring(0, 2).toUpperCase() }}
-                      </div>
-                    </div>
-                    <div
-                      class="text-xs font-bold text-coral-dark line-clamp-1 leading-tight w-full"
-                    >
-                      {{ slot.name }}
-                    </div>
-                    <div
-                      class="text-[9px] text-coral-muted font-mono mt-0.5 truncate w-full"
-                    >
-                      {{ slot.id }}
-                    </div>
-                  </div>
-                  <div v-else class="my-auto text-center text-coral-sky">
-                    <span
-                      class="text-xl block leading-none font-thin text-coral-sky/70"
-                      >+</span
-                    >
-                    <span class="text-[10px] text-coral-muted">Kosong</span>
-                  </div>
-                  <div class="flex items-center justify-end">
-                    <span
-                      v-if="!slot.empty"
-                      class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-coral-base text-coral-dark border border-coral-border"
+                      class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-coral-base text-coral-dark border border-coral-border ml-auto"
                     >
                       x{{ slot.quantity }}
                     </span>
@@ -805,14 +570,14 @@
             </div>
           </div>
 
-          <!-- TAB 2: PLAYER & ECONOMY -->
+          <!-- TAB 2: PLAYER & STATS EDITOR -->
           <div
             v-if="activeTab === 'player'"
-            class="max-w-3xl mx-auto space-y-6"
+            class="max-w-4xl mx-auto space-y-6"
           >
             <!-- Profile Card -->
             <div
-              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-6"
+              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-5"
             >
               <h2
                 class="text-base font-bold text-coral-dark border-b border-coral-border pb-3"
@@ -823,55 +588,66 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
-                    class="block text-xs font-semibold text-coral-muted mb-1"
+                    for="player-name"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
                     >Nama Karakter</label
                   >
                   <input
+                    id="player-name"
                     type="text"
                     v-model="player.name"
-                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure focus:outline-none"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure"
                   />
                 </div>
 
                 <div>
                   <label
-                    class="block text-xs font-semibold text-coral-muted mb-1"
-                    >Panggilan / Gelar (Title)</label
+                    for="player-title"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Panggilan / Gelar Kustom (Title)</label
                   >
                   <input
+                    id="player-title"
                     type="text"
                     v-model="player.title"
-                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure focus:outline-none"
+                    placeholder="Contoh: Kak, Tuan, Nona"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure"
                   />
                 </div>
 
                 <div>
                   <label
-                    class="block text-xs font-semibold text-coral-muted mb-1"
+                    for="player-gender"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
                     >Gender</label
                   >
                   <select
+                    id="player-gender"
                     v-model="player.gender"
-                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure focus:outline-none cursor-pointer"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure cursor-pointer"
                   >
                     <option value="EC_Gender::Male">Laki-Laki (Male)</option>
                     <option value="EC_Gender::Female">
                       Perempuan (Female)
                     </option>
-                    <option value="EC_Gender::Other">Other</option>
-                    <option value="EC_Gender::Custom">Kustom (Custom)</option>
+                    <option value="EC_Gender::Other">Lainnya (Other)</option>
+                    <option value="EC_Gender::Custom">
+                      Kustom (Mengikuti Panggilan)
+                    </option>
                   </select>
                 </div>
 
                 <div>
                   <label
-                    class="block text-xs font-semibold text-coral-muted mb-1"
-                    >Nama Kebun (Farm Name)</label
+                    for="player-farm"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Nama Perkebunan (Farm Name)</label
                   >
                   <input
+                    id="player-farm"
                     type="text"
                     v-model="player.farmName"
-                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure focus:outline-none"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure"
                   />
                 </div>
               </div>
@@ -879,7 +655,7 @@
 
             <!-- Economy Card -->
             <div
-              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-6"
+              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-5"
             >
               <h2
                 class="text-base font-bold text-coral-dark border-b border-coral-border pb-3"
@@ -890,34 +666,38 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Gold (Uang) -->
                 <div
-                  class="bg-[#fcf8e6]/50 border border-[#ecd57c] rounded-xl p-4 space-y-3"
+                  class="bg-[#fcf8e6]/60 border border-[#ecd57c] rounded-xl p-4 space-y-3"
                 >
                   <div class="flex items-center justify-between">
-                    <span
+                    <label
+                      for="player-gold"
                       class="text-xs font-bold uppercase tracking-wider text-[#8f6804]"
                     >
-                      Gold (Uang)
-                    </span>
+                      Gold (Koin Emas)
+                    </label>
                     <span class="text-sm font-mono font-bold text-[#8f6804]">
                       {{ Number(player.gold).toLocaleString() }}
                     </span>
                   </div>
                   <input
+                    id="player-gold"
                     type="number"
                     v-model="player.gold"
                     min="0"
-                    class="w-full bg-white border border-[#ecd57c] rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:outline-none focus:border-[#8f6804]"
+                    class="w-full bg-white border border-[#ecd57c] rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:border-[#8f6804]"
                   />
                   <div class="flex gap-2">
                     <button
+                      type="button"
                       @click="addGold(100000)"
-                      class="flex-1 text-[11px] bg-white hover:bg-[#fcf8e6] text-[#8f6804] border border-[#ecd57c] py-1.5 rounded font-semibold transition shadow-2xs"
+                      class="flex-1 text-xs bg-white hover:bg-[#fcf8e6] text-[#8f6804] border border-[#ecd57c] py-2 rounded-md font-semibold transition"
                     >
                       +100.000
                     </button>
                     <button
+                      type="button"
                       @click="addGold(1000000)"
-                      class="flex-1 text-[11px] bg-white hover:bg-[#fcf8e6] text-[#8f6804] border border-[#ecd57c] py-1.5 rounded font-semibold transition shadow-2xs"
+                      class="flex-1 text-xs bg-white hover:bg-[#fcf8e6] text-[#8f6804] border border-[#ecd57c] py-2 rounded-md font-semibold transition"
                     >
                       +1.000.000
                     </button>
@@ -926,34 +706,38 @@
 
                 <!-- Merit Points -->
                 <div
-                  class="bg-coral-base border border-coral-sky/80 rounded-xl p-4 space-y-3"
+                  class="bg-coral-base border border-coral-sky rounded-xl p-4 space-y-3"
                 >
                   <div class="flex items-center justify-between">
-                    <span
+                    <label
+                      for="player-merit"
                       class="text-xs font-bold uppercase tracking-wider text-coral-dark"
                     >
                       Merit Points
-                    </span>
-                    <span class="text-sm font-mono font-bold text-coral-azure">
+                    </label>
+                    <span class="text-sm font-mono font-bold text-coral-dark">
                       {{ Number(player.meritPoints).toLocaleString() }}
                     </span>
                   </div>
                   <input
+                    id="player-merit"
                     type="number"
                     v-model="player.meritPoints"
                     min="0"
-                    class="w-full bg-white border border-coral-sky rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:outline-none focus:border-coral-azure"
+                    class="w-full bg-white border border-coral-sky rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:border-coral-azure"
                   />
                   <div class="flex gap-2">
                     <button
+                      type="button"
                       @click="addMerit(5000)"
-                      class="flex-1 text-[11px] bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded font-semibold transition shadow-2xs"
+                      class="flex-1 text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-2 rounded-md font-semibold transition"
                     >
                       +5.000
                     </button>
                     <button
+                      type="button"
                       @click="addMerit(50000)"
-                      class="flex-1 text-[11px] bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded font-semibold transition shadow-2xs"
+                      class="flex-1 text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-2 rounded-md font-semibold transition"
                     >
                       +50.000
                     </button>
@@ -961,6 +745,767 @@
                 </div>
               </div>
             </div>
+
+            <!-- Stamina, Health & Bag Capacity Card -->
+            <div
+              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-5"
+            >
+              <div>
+                <h2 class="text-base font-bold text-coral-dark">
+                  Atribut Fisik dan Kapasitas Tas
+                </h2>
+                <p class="text-xs text-coral-muted mt-0.5">
+                  Tingkatkan jumlah konsumsi buah penambah batas maksimum
+                  Stamina, Kesehatan (HP), dan kapasitas slot tas.
+                </p>
+              </div>
+
+              <div
+                class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-coral-border"
+              >
+                <!-- Stamina Fruit -->
+                <div
+                  class="bg-coral-base border border-coral-border rounded-xl p-4 space-y-3"
+                >
+                  <div class="flex items-center justify-between">
+                    <label
+                      for="stamina-fruit"
+                      class="text-xs font-bold text-coral-dark"
+                    >
+                      Buah Stamina (Stamina Fruit)
+                    </label>
+                    <span class="text-xs font-mono font-bold text-coral-dark">
+                      {{ player.staminaFruit }} buah
+                    </span>
+                  </div>
+                  <input
+                    id="stamina-fruit"
+                    type="number"
+                    v-model="player.staminaFruit"
+                    min="0"
+                    max="50"
+                    class="w-full bg-white border border-coral-border rounded-lg px-3 py-2 text-sm font-mono text-coral-dark"
+                  />
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      @click="player.staminaFruit = Math.min(50, Number(player.staminaFruit || 0) + 1)"
+                      class="flex-1 text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded-md font-semibold transition"
+                    >
+                      +1
+                    </button>
+                    <button
+                      type="button"
+                      @click="player.staminaFruit = 10"
+                      class="flex-1 text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded-md font-semibold transition"
+                    >
+                      Set 10
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Wellness Fruit -->
+                <div
+                  class="bg-coral-base border border-coral-border rounded-xl p-4 space-y-3"
+                >
+                  <div class="flex items-center justify-between">
+                    <label
+                      for="wellness-fruit"
+                      class="text-xs font-bold text-coral-dark"
+                    >
+                      Buah Kesehatan (Wellness Fruit)
+                    </label>
+                    <span class="text-xs font-mono font-bold text-coral-dark">
+                      {{ player.wellnessFruit }} buah
+                    </span>
+                  </div>
+                  <input
+                    id="wellness-fruit"
+                    type="number"
+                    v-model="player.wellnessFruit"
+                    min="0"
+                    max="50"
+                    class="w-full bg-white border border-coral-border rounded-lg px-3 py-2 text-sm font-mono text-coral-dark"
+                  />
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      @click="player.wellnessFruit = Math.min(50, Number(player.wellnessFruit || 0) + 1)"
+                      class="flex-1 text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded-md font-semibold transition"
+                    >
+                      +1
+                    </button>
+                    <button
+                      type="button"
+                      @click="player.wellnessFruit = 10"
+                      class="flex-1 text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded-md font-semibold transition"
+                    >
+                      Set 10
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Inventory Limit -->
+                <div
+                  class="bg-coral-base border border-coral-border rounded-xl p-4 space-y-3"
+                >
+                  <div class="flex items-center justify-between">
+                    <label
+                      for="bag-limit"
+                      class="text-xs font-bold text-coral-dark"
+                    >
+                      Kapasitas Slot Tas
+                    </label>
+                    <span class="text-xs font-mono font-bold text-coral-dark">
+                      {{ player.inventoryLimit }} / 40
+                    </span>
+                  </div>
+                  <input
+                    id="bag-limit"
+                    type="number"
+                    v-model="player.inventoryLimit"
+                    min="15"
+                    max="40"
+                    class="w-full bg-white border border-coral-border rounded-lg px-3 py-2 text-sm font-mono text-coral-dark"
+                  />
+                  <button
+                    type="button"
+                    @click="setMaxBag"
+                    class="w-full text-xs bg-white hover:bg-coral-subtle text-coral-dark border border-coral-border py-1.5 rounded-md font-bold transition"
+                  >
+                    Buka Maksimum (40 Slot)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: WORLD, TOWN RANK, CALENDAR & WAYPOINTS (PAKET 1) -->
+          <div v-if="activeTab === 'world'" class="max-w-5xl mx-auto space-y-6">
+            <!-- Town Rank & Points Card -->
+            <div
+              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-5"
+            >
+              <div
+                class="flex flex-wrap items-center justify-between gap-4 border-b border-coral-border pb-3"
+              >
+                <div>
+                  <h2 class="text-base font-bold text-coral-dark">
+                    Peringkat dan Poin Kota (Town Rank)
+                  </h2>
+                  <p class="text-xs text-coral-muted mt-0.5">
+                    Atur tingkatan Town Rank serta akumulasi poin kontribusi
+                    kota Starlet Town.
+                  </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    @click="setTownRankPreset(5, 2200, 'Rank A')"
+                    class="px-3 py-1.5 text-xs font-bold bg-coral-base hover:bg-coral-subtle text-coral-dark border border-coral-border rounded-md transition"
+                  >
+                    Preset Rank A (2.200 Poin)
+                  </button>
+                  <button
+                    type="button"
+                    @click="setTownRankPreset(6, 3500, 'Rank S')"
+                    class="px-3 py-1.5 text-xs font-bold bg-coral-azure hover:bg-coral-dark text-white rounded-md transition"
+                  >
+                    Preset Rank S (3.500 Poin)
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label
+                    for="town-rank-select"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Tingkatan Town Rank</label
+                  >
+                  <select
+                    id="town-rank-select"
+                    v-model.number="world.townRank"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm font-semibold text-coral-dark focus:bg-white focus:border-coral-azure cursor-pointer"
+                  >
+                    <option :value="0">Rank F (Awal)</option>
+                    <option :value="1">Rank E</option>
+                    <option :value="2">Rank D</option>
+                    <option :value="3">Rank C</option>
+                    <option :value="4">Rank B</option>
+                    <option :value="5">Rank A</option>
+                    <option :value="6">Rank S (Tertinggi)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    for="overall-town-point"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Total Poin Kota (Overall Points)</label
+                  >
+                  <input
+                    id="overall-town-point"
+                    type="number"
+                    v-model.number="world.overallTownPoint"
+                    min="0"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:bg-white focus:border-coral-azure"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="current-town-point"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Poin Rank Aktif (Current Points)</label
+                  >
+                  <input
+                    id="current-town-point"
+                    type="number"
+                    v-model.number="world.currentTownPoint"
+                    min="0"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:bg-white focus:border-coral-azure"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Calendar, Season & Weather Card -->
+            <div
+              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-5"
+            >
+              <div class="border-b border-coral-border pb-3">
+                <h2 class="text-base font-bold text-coral-dark">
+                  Kalender, Musim, dan Cuaca
+                </h2>
+                <p class="text-xs text-coral-muted mt-0.5">
+                  Sesuaikan tanggal permainan (1 s/d 28), musim berjalan, serta
+                  kondisi cuaca harian.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <label
+                    for="world-day"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Tanggal Hari (1 - 28)</label
+                  >
+                  <input
+                    id="world-day"
+                    type="number"
+                    v-model.number="world.day"
+                    min="1"
+                    max="28"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm font-mono text-coral-dark focus:bg-white focus:border-coral-azure"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="world-season"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Musim (Season)</label
+                  >
+                  <select
+                    id="world-season"
+                    v-model="world.season"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure cursor-pointer"
+                  >
+                    <option value="EC_Season::Spring">
+                      Musim Semi (Spring)
+                    </option>
+                    <option value="EC_Season::Summer">
+                      Musim Panas (Summer)
+                    </option>
+                    <option value="EC_Season::Fall">Musim Gugur (Fall)</option>
+                    <option value="EC_Season::Winter">
+                      Musim Dingin (Winter)
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    for="world-weather"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Cuaca Hari Ini</label
+                  >
+                  <select
+                    id="world-weather"
+                    v-model="world.currentWeather"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure cursor-pointer"
+                  >
+                    <option value="EC_Weather::Sunny">Cerah (Sunny)</option>
+                    <option value="EC_Weather::Rain">Hujan (Rain)</option>
+                    <option value="EC_Weather::Storm">
+                      Badai Petir (Storm)
+                    </option>
+                    <option value="EC_Weather::Windy">Berangin (Windy)</option>
+                    <option value="EC_Weather::Snow">Salju (Snow)</option>
+                    <option value="EC_Weather::Blizzard">
+                      Badai Salju (Blizzard)
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    for="world-forecast"
+                    class="block text-xs font-semibold text-coral-dark mb-1"
+                    >Ramalan Cuaca Besok</label
+                  >
+                  <select
+                    id="world-forecast"
+                    v-model="world.weatherForecast"
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure cursor-pointer"
+                  >
+                    <option value="EC_Weather::Sunny">Cerah (Sunny)</option>
+                    <option value="EC_Weather::Rain">Hujan (Rain)</option>
+                    <option value="EC_Weather::Storm">
+                      Badai Petir (Storm)
+                    </option>
+                    <option value="EC_Weather::Windy">Berangin (Windy)</option>
+                    <option value="EC_Weather::Snow">Salju (Snow)</option>
+                    <option value="EC_Weather::Blizzard">
+                      Badai Salju (Blizzard)
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fast Travel Waypoints Unlocker Card -->
+            <div
+              class="bg-coral-card border border-coral-border rounded-xl p-6 shadow-sm space-y-5"
+            >
+              <div
+                class="flex flex-wrap items-center justify-between gap-4 border-b border-coral-border pb-3"
+              >
+                <div>
+                  <div class="flex items-center gap-2.5">
+                    <h2 class="text-base font-bold text-coral-dark">
+                      Titik Teleportasi (Fast Travel Waypoints)
+                    </h2>
+                    <span
+                      class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-coral-base border border-coral-border text-coral-dark"
+                    >
+                      {{ world.waypoints.length }} / {{ allWaypoints.length }}
+                      Terbuka
+                    </span>
+                  </div>
+                  <p class="text-xs text-coral-muted mt-0.5">
+                    Klik pada lokasi di bawah untuk mengaktifkan atau
+                    menonaktifkan titik teleportasi patung kuil.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  @click="unlockAllWaypoints"
+                  class="px-4 py-2 text-xs font-bold bg-coral-azure hover:bg-coral-dark text-white rounded-lg transition shadow-2xs"
+                >
+                  Buka Semua Titik Teleport
+                </button>
+              </div>
+
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"
+              >
+                <button
+                  v-for="wp in allWaypoints"
+                  :key="wp.id"
+                  type="button"
+                  @click="toggleWaypoint(wp.id)"
+                  class="flex items-center justify-between p-3 rounded-lg border text-left transition"
+                  :class="
+                    isWaypointUnlocked(wp.id)
+                      ? 'bg-coral-base border-coral-dark text-coral-dark font-semibold'
+                      : 'bg-white border-coral-border text-coral-muted hover:border-coral-sky'
+                  "
+                >
+                  <div class="min-w-0 pr-2">
+                    <div class="text-xs truncate">
+                      {{ itemLang === 'id' ? wp.nameId : wp.nameEn }}
+                    </div>
+                    <div class="text-[10px] font-mono text-coral-muted">
+                      {{ wp.id }}
+                    </div>
+                  </div>
+                  <span
+                    class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md flex-shrink-0"
+                    :class="
+                      isWaypointUnlocked(wp.id)
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
+                    "
+                  >
+                    {{ isWaypointUnlocked(wp.id) ? 'Aktif' : 'Terkunci' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: NPC RELATIONSHIPS (Paket 2) -->
+          <div v-if="activeTab === 'npcs'" class="max-w-6xl mx-auto space-y-5">
+            <!-- Top Control & Summary Card -->
+            <div
+              class="bg-coral-card border border-coral-border rounded-xl p-5 shadow-sm space-y-4"
+            >
+              <div
+                class="flex flex-wrap items-start justify-between gap-3 border-b border-coral-border pb-4"
+              >
+                <div>
+                  <div class="flex items-center gap-2.5">
+                    <h2 class="text-base font-bold text-coral-dark">
+                      Hubungan dan Interaksi Sosial NPC
+                    </h2>
+                    <span
+                      class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-coral-base border border-coral-border text-coral-dark"
+                    >
+                      {{ filteredNpcs.length }} / {{ npcs.length }} Warga
+                    </span>
+                  </div>
+                  <p class="text-xs text-coral-muted mt-0.5">
+                    Atur poin hati warga Starlet Town (1 Hati = 400 poin,
+                    Maksimum 10 Hati = 4.000 poin) serta reset kuota hadiah
+                    mingguan.
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    @click="resetAllNpcGifts()"
+                    class="px-3 py-1.5 text-xs font-semibold bg-coral-base hover:bg-coral-subtle border border-coral-border text-coral-dark rounded-lg transition"
+                  >
+                    Reset Semua Kuota Hadiah
+                  </button>
+                  <button
+                    type="button"
+                    @click="maxAllNpcHearts(true)"
+                    class="px-3 py-1.5 text-xs font-semibold bg-coral-base hover:bg-coral-subtle border border-coral-border text-coral-dark rounded-lg transition"
+                  >
+                    Max 10 Hati (Romanceable)
+                  </button>
+                  <button
+                    type="button"
+                    @click="maxAllNpcHearts(false)"
+                    class="px-3.5 py-1.5 text-xs font-bold bg-coral-azure hover:bg-coral-dark text-white rounded-lg transition shadow-2xs"
+                  >
+                    Max 10 Hati (Semua NPC)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Search & Filter Bar -->
+              <div
+                class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+              >
+                <div class="relative flex-1">
+                  <label for="npc-search-input" class="sr-only"
+                    >Cari nama warga NPC</label
+                  >
+                  <input
+                    id="npc-search-input"
+                    type="text"
+                    v-model="npcSearch"
+                    @input="onNpcSearchInput"
+                    placeholder="Cari nama warga (contoh: Alice, Surya, Yuri, Wakuu, Connor)..."
+                    class="w-full bg-coral-base border border-coral-border rounded-lg px-3.5 py-2 text-xs text-coral-dark focus:bg-white focus:border-coral-azure"
+                  />
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <div
+                    class="flex items-center bg-coral-base border border-coral-border rounded-lg p-0.5 text-xs font-semibold"
+                    role="group"
+                    aria-label="Filter Kategori NPC"
+                  >
+                    <button
+                      type="button"
+                      @click="setNpcFilter('all')"
+                      :class="npcFilter === 'all' ? 'bg-coral-dark text-white shadow-2xs' : 'text-coral-muted hover:text-coral-dark'"
+                      class="px-3 py-1.5 rounded-md transition"
+                    >
+                      Semua
+                    </button>
+                    <button
+                      type="button"
+                      @click="setNpcFilter('romanceable')"
+                      :class="npcFilter === 'romanceable' ? 'bg-coral-dark text-white shadow-2xs' : 'text-coral-muted hover:text-coral-dark'"
+                      class="px-3 py-1.5 rounded-md transition"
+                    >
+                      Romanceable
+                    </button>
+                    <button
+                      type="button"
+                      @click="setNpcFilter('townfolk')"
+                      :class="npcFilter === 'townfolk' ? 'bg-coral-dark text-white shadow-2xs' : 'text-coral-muted hover:text-coral-dark'"
+                      class="px-3 py-1.5 rounded-md transition"
+                    >
+                      Warga Biasa
+                    </button>
+                  </div>
+
+                  <div class="flex items-center gap-1.5">
+                    <label
+                      for="npc-per-page"
+                      class="text-xs font-semibold text-coral-muted"
+                    >
+                      Tampil:
+                    </label>
+                    <select
+                      id="npc-per-page"
+                      :value="npcPerPage"
+                      @change="setNpcPerPage($event.target.value)"
+                      class="bg-coral-base border border-coral-border rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-coral-dark focus:bg-white focus:border-coral-azure"
+                    >
+                      <option :value="12">12 / hal</option>
+                      <option :value="24">24 / hal</option>
+                      <option :value="48">48 / hal</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NPC Grid -->
+            <div
+              v-if="filteredNpcs.length === 0"
+              class="bg-coral-card border border-coral-border rounded-xl p-8 text-center text-xs text-coral-muted"
+            >
+              Tidak ada warga NPC yang cocok dengan pencarian "{{ npcSearch }}".
+            </div>
+
+            <template v-else>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5"
+              >
+                <div
+                  v-for="npc in paginatedNpcs"
+                  :key="npc.id"
+                  class="bg-coral-card border border-coral-border rounded-xl p-4 shadow-2xs flex flex-col justify-between gap-3"
+                >
+                  <!-- Card Header -->
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-lg bg-coral-base border border-coral-border flex items-center justify-center font-bold text-sm text-coral-dark flex-shrink-0"
+                      >
+                        {{ npc.name.charAt(0) }}
+                      </div>
+                      <div class="min-w-0">
+                        <div
+                          class="text-sm font-bold text-coral-dark truncate"
+                          :title="npc.name"
+                        >
+                          {{ npc.name }}
+                        </div>
+                        <div class="text-[10px] font-mono text-coral-muted">
+                          ID: {{ npc.id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span
+                        class="text-[10px] font-semibold px-2 py-0.5 rounded border"
+                        :class="
+                          npc.isRomanceable
+                            ? 'bg-coral-base text-coral-dark border-coral-sky'
+                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                        "
+                      >
+                        {{ npc.isRomanceable ? 'Romanceable' : 'Warga' }}
+                      </span>
+                      <span class="text-xs font-mono font-bold text-coral-dark">
+                        {{ npc.hearts }} / 10 Hati
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- 10-Heart Interactive Bar -->
+                  <div
+                    class="bg-coral-base/70 border border-coral-border rounded-lg px-2.5 py-2 flex items-center justify-between gap-1"
+                    role="group"
+                    :aria-label="'Pilih jumlah hati untuk ' + npc.name"
+                  >
+                    <button
+                      type="button"
+                      @click="setNpcHearts(npc, 0)"
+                      title="Set 0 Hati"
+                      :aria-label="'Set ' + npc.name + ' ke 0 hati'"
+                      class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white border border-coral-border text-coral-muted hover:text-coral-dark transition"
+                    >
+                      0
+                    </button>
+                    <div class="flex items-center gap-0.5">
+                      <button
+                        v-for="h in 10"
+                        :key="h"
+                        type="button"
+                        @click="setNpcHearts(npc, h)"
+                        :title="h + ' Hati (' + (h * 400) + ' poin)'"
+                        :aria-label="'Set ' + npc.name + ' ke ' + h + ' hati'"
+                        class="p-0.5 rounded hover:scale-110 transition focus:outline-none"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          :class="
+                            h <= npc.hearts
+                              ? 'text-coral-azure fill-current'
+                              : 'text-coral-border fill-current'
+                          "
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      @click="setNpcHearts(npc, 10)"
+                      title="Set Maksimum 10 Hati"
+                      :aria-label="'Set ' + npc.name + ' ke 10 hati'"
+                      class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white border border-coral-border text-coral-dark hover:bg-coral-dark hover:text-white transition"
+                    >
+                      Max
+                    </button>
+                  </div>
+
+                  <!-- Exact Points & Weekly Gift Reset -->
+                  <div
+                    class="flex items-center justify-between gap-2 pt-1 border-t border-coral-border/60"
+                  >
+                    <div class="flex items-center gap-1.5">
+                      <label
+                        :for="'npc-pts-' + npc.id"
+                        class="text-[11px] font-semibold text-coral-muted"
+                      >
+                        Poin:
+                      </label>
+                      <input
+                        :id="'npc-pts-' + npc.id"
+                        type="number"
+                        min="0"
+                        max="4000"
+                        step="50"
+                        v-model.number="npc.heartPoints"
+                        @input="onNpcPointsInput(npc)"
+                        class="w-20 bg-white border border-coral-border rounded px-2 py-1 text-xs font-mono font-bold text-coral-dark"
+                      />
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[11px] font-mono text-coral-muted">
+                        Hadiah: {{ npc.weeklyGiftsCount }}/2
+                      </span>
+                      <button
+                        v-if="npc.weeklyGiftsCount > 0 || npc.dailyGiftLeft < 1"
+                        type="button"
+                        @click="resetNpcGift(npc)"
+                        class="text-[11px] font-semibold px-2 py-1 rounded bg-coral-base hover:bg-coral-subtle border border-coral-border text-coral-dark transition"
+                      >
+                        Reset Kuota
+                      </button>
+                      <span
+                        v-else
+                        class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      >
+                        Siap
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pagination Bar -->
+              <div
+                class="bg-coral-card border border-coral-border rounded-xl px-4 py-3 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3"
+                role="navigation"
+                aria-label="Navigasi Halaman NPC"
+              >
+                <div class="text-xs text-coral-muted">
+                  Menampilkan
+                  <span class="font-mono font-bold text-coral-dark"
+                    >{{ npcRangeStart }} - {{ npcRangeEnd }}</span
+                  >
+                  dari
+                  <span class="font-mono font-bold text-coral-dark"
+                    >{{ filteredNpcs.length }}</span
+                  >
+                  warga (Halaman
+                  <span class="font-mono font-bold text-coral-dark"
+                    >{{ safeNpcPage }}</span
+                  >
+                  /
+                  <span class="font-mono font-bold text-coral-dark"
+                    >{{ npcTotalPages }}</span
+                  >)
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    @click="goToNpcPage(1)"
+                    :disabled="safeNpcPage <= 1"
+                    aria-label="Halaman Pertama"
+                    class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-coral-border bg-coral-base text-coral-dark hover:bg-coral-subtle disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Awal
+                  </button>
+                  <button
+                    type="button"
+                    @click="goToNpcPage(safeNpcPage - 1)"
+                    :disabled="safeNpcPage <= 1"
+                    aria-label="Halaman Sebelumnya"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-coral-border bg-coral-base text-coral-dark hover:bg-coral-subtle disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Sebelumnya
+                  </button>
+
+                  <button
+                    v-for="p in npcPageNumbers"
+                    :key="p"
+                    type="button"
+                    @click="goToNpcPage(p)"
+                    :aria-label="'Halaman ' + p"
+                    :aria-current="p === safeNpcPage ? 'page' : undefined"
+                    class="w-8 h-8 text-xs font-mono font-bold rounded-lg border transition flex items-center justify-center"
+                    :class="
+                      p === safeNpcPage
+                        ? 'bg-coral-dark text-white border-coral-dark shadow-2xs'
+                        : 'bg-white text-coral-dark border-coral-border hover:bg-coral-base'
+                    "
+                  >
+                    {{ p }}
+                  </button>
+
+                  <button
+                    type="button"
+                    @click="goToNpcPage(safeNpcPage + 1)"
+                    :disabled="safeNpcPage >= npcTotalPages"
+                    aria-label="Halaman Berikutnya"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-coral-border bg-coral-base text-coral-dark hover:bg-coral-subtle disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Berikutnya
+                  </button>
+                  <button
+                    type="button"
+                    @click="goToNpcPage(npcTotalPages)"
+                    :disabled="safeNpcPage >= npcTotalPages"
+                    aria-label="Halaman Terakhir"
+                    class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-coral-border bg-coral-base text-coral-dark hover:bg-coral-subtle disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Akhir
+                  </button>
+                </div>
+              </div>
+            </template>
           </div>
         </main>
       </div>
@@ -968,10 +1513,14 @@
       <!-- MODAL: EDIT SLOT ITEM -->
       <div
         v-if="modal.open"
+        @click="closeSlotEditor"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-coral-dark/40"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="'Edit Slot ' + (modal.slotIndex + 1)"
       >
         <div
-          class="bg-coral-card border border-coral-border rounded-xl max-w-xl w-full p-6 shadow-xl space-y-5"
+          class="bg-coral-card border border-coral-border rounded-xl max-w-xl w-full p-6 shadow-xl space-y-5 max-h-[90vh] overflow-y-auto"
           @click.stop
         >
           <!-- Modal Header -->
@@ -983,14 +1532,16 @@
                 >Edit Slot #{{ modal.slotIndex + 1 }}</span
               >
               <span
-                class="text-xs font-mono px-2 py-0.5 rounded bg-coral-base text-coral-muted border border-coral-border"
+                class="text-xs font-mono px-2 py-0.5 rounded-md bg-coral-base text-coral-dark border border-coral-border"
               >
                 Index: {{ modal.slotIndex }}
               </span>
             </div>
             <button
+              type="button"
               @click="closeSlotEditor"
-              class="text-coral-muted hover:text-coral-dark text-xl font-bold leading-none"
+              aria-label="Tutup modal"
+              class="w-8 h-8 rounded-md text-coral-muted hover:text-coral-dark hover:bg-coral-base flex items-center justify-center text-xl font-bold leading-none"
             >
               &times;
             </button>
@@ -998,16 +1549,20 @@
 
           <!-- Search Bar -->
           <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-coral-muted"
-              >Cari Item di Database (Ketik Nama / ID):</label
+            <label
+              for="item-search-input"
+              class="block text-xs font-semibold text-coral-dark"
             >
+              Cari Item (Ketik Nama Indonesia, Inggris, atau Kode ID):
+            </label>
             <div class="relative">
               <input
+                id="item-search-input"
                 type="text"
                 v-model="modal.searchQuery"
                 @input="onSearchInput"
-                placeholder="Contoh: Hardwood, Arame, Auto Chest, Diamond..."
-                class="w-full bg-coral-base border border-coral-border rounded-lg px-4 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure focus:outline-none"
+                placeholder="Contoh: Kayu keras, Stroberi, Peti otomatis, Hardwood..."
+                class="w-full bg-coral-base border border-coral-border rounded-lg px-4 py-2 text-sm text-coral-dark focus:bg-white focus:border-coral-azure"
               />
               <span
                 v-if="modal.isSearching"
@@ -1034,54 +1589,64 @@
 
           <!-- Search Results List -->
           <div
-            class="max-h-44 overflow-y-auto space-y-1 pr-1 bg-coral-base/60 p-2 rounded-lg border border-coral-border"
+            class="max-h-48 overflow-y-auto space-y-1 pr-1 bg-coral-base/60 p-2 rounded-lg border border-coral-border"
           >
-            <div
+            <button
               v-for="it in modal.searchResults"
               :key="it.baseId"
+              type="button"
               @click="selectItem(it)"
-              class="px-3 py-2 rounded text-xs flex items-center justify-between cursor-pointer select-none transition"
-              :class="modal.selectedItem?.baseId === it.baseId ? 'bg-coral-azure/10 text-coral-dark border border-coral-azure/40 font-semibold' : 'text-coral-dark hover:bg-white'"
+              class="w-full px-3 py-2 rounded-md text-xs flex items-center justify-between cursor-pointer select-none transition text-left"
+              :class="modal.selectedItem?.baseId === it.baseId ? 'bg-coral-subtle text-coral-dark border border-coral-dark font-semibold' : 'text-coral-dark hover:bg-white'"
             >
               <div class="flex items-center gap-2.5 min-w-0">
                 <div
-                  class="w-7 h-7 rounded bg-white border border-coral-border flex items-center justify-center flex-shrink-0"
+                  class="w-7 h-7 rounded-md bg-white border border-coral-border flex items-center justify-center flex-shrink-0"
                 >
                   <img
-                    v-if="iconMap[it.name]"
-                    :src="iconMap[it.name]"
-                    :alt="it.name"
+                    v-if="iconMap[getIconKey(it)]"
+                    :src="iconMap[getIconKey(it)]"
+                    :alt="getItemName(it)"
                     class="w-6 h-6 object-contain item-icon"
                     loading="lazy"
                     referrerpolicy="no-referrer"
-                    @load="onImageLoad($event, it.name)"
-                    @error="onImageError(it.name)"
+                    @load="onImageLoad($event, getIconKey(it))"
+                    @error="onImageError(getIconKey(it))"
                   />
                   <span
                     v-else
-                    class="text-[9px] font-bold text-coral-muted uppercase"
+                    class="text-[9px] font-bold text-coral-dark uppercase"
                   >
-                    {{ it.name.substring(0, 1) }}
+                    {{ getItemName(it).substring(0, 1) }}
                   </span>
                 </div>
                 <div class="truncate">
-                  <span>{{ it.name }}</span>
-                  <span class="text-[10px] text-coral-muted font-mono ml-2"
+                  <span class="font-bold text-coral-dark"
+                    >{{ getItemName(it) }}</span
+                  >
+                  <span
+                    v-if="it.nameEn && it.nameEn !== getItemName(it)"
+                    class="text-[11px] text-coral-muted ml-1.5"
+                  >
+                    / {{ it.nameEn }}
+                  </span>
+                  <span class="text-[10px] text-coral-muted font-mono ml-1.5"
                     >({{ it.baseId }})</span
                   >
                 </div>
               </div>
               <span
-                class="text-[10px] px-2 py-0.5 rounded bg-coral-base border border-coral-border text-coral-muted font-normal flex-shrink-0"
+                class="text-[10px] px-2 py-0.5 rounded-md bg-coral-base border border-coral-border text-coral-dark font-medium flex-shrink-0 ml-2"
               >
                 {{ it.category }}
               </span>
-            </div>
+            </button>
             <div
               v-if="modal.searchResults.length === 0"
               class="text-center py-4 text-xs text-coral-muted"
             >
-              Tidak ada item ditemukan untuk "{{ modal.searchQuery }}".
+              Tidak ada item ditemukan untuk kata kunci "{{ modal.searchQuery
+              }}". Ketik nama lain atau kode ID item.
             </div>
           </div>
 
@@ -1090,53 +1655,67 @@
             v-if="modal.selectedItem"
             class="bg-coral-base p-4 rounded-lg border border-coral-border space-y-4"
           >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
                 <div
                   class="w-12 h-12 rounded-lg bg-white border border-coral-border flex items-center justify-center flex-shrink-0 shadow-2xs"
                 >
                   <img
-                    v-if="iconMap[modal.selectedItem.name]"
-                    :src="iconMap[modal.selectedItem.name]"
-                    :alt="modal.selectedItem.name"
+                    v-if="iconMap[getIconKey(modal.selectedItem)]"
+                    :src="iconMap[getIconKey(modal.selectedItem)]"
+                    :alt="getItemName(modal.selectedItem)"
                     class="w-10 h-10 object-contain item-icon"
                     referrerpolicy="no-referrer"
-                    @load="onImageLoad($event, modal.selectedItem.name)"
+                    @load="onImageLoad($event, getIconKey(modal.selectedItem))"
                   />
-                  <span v-else class="text-xs font-bold text-coral-muted">
-                    {{ modal.selectedItem.name.substring(0, 2).toUpperCase() }}
+                  <span v-else class="text-xs font-bold text-coral-dark">
+                    {{ getItemName(modal.selectedItem).substring(0,
+                    2).toUpperCase() }}
                   </span>
                 </div>
-                <div>
-                  <div class="text-sm font-bold text-coral-dark">
-                    {{ modal.selectedItem.name }}
+                <div class="min-w-0">
+                  <div class="text-sm font-bold text-coral-dark truncate">
+                    {{ getItemName(modal.selectedItem) }}
                   </div>
-                  <div class="text-xs font-mono text-coral-azure font-medium">
+                  <div
+                    v-if="modal.selectedItem.nameEn && modal.selectedItem.nameEn !== getItemName(modal.selectedItem)"
+                    class="text-xs text-coral-muted truncate"
+                  >
+                    Nama Inggris: {{ modal.selectedItem.nameEn }}
+                  </div>
+                  <div class="text-xs font-mono text-coral-dark font-semibold">
                     ID Akhir: {{ currentComputedId }}
                   </div>
                 </div>
               </div>
               <span
-                class="text-xs px-2.5 py-1 rounded bg-white border border-coral-border text-coral-muted font-medium"
+                class="text-xs px-2.5 py-1 rounded-md bg-white border border-coral-border text-coral-dark font-semibold flex-shrink-0"
               >
                 {{ modal.selectedItem.category }}
               </span>
             </div>
 
+            <p
+              v-if="getItemDesc(modal.selectedItem)"
+              class="text-xs text-coral-muted bg-white/70 px-3 py-2 rounded-md border border-coral-border"
+            >
+              {{ getItemDesc(modal.selectedItem) }}
+            </p>
+
             <!-- Quality Selection -->
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-coral-muted"
+              <label class="block text-xs font-semibold text-coral-dark"
                 >Tingkat Kualitas (Item Quality):</label
               >
               <div
                 v-if="modal.selectedItem.hasQualities"
-                class="grid grid-cols-5 gap-2"
+                class="grid grid-cols-2 sm:grid-cols-5 gap-2"
               >
                 <button
                   type="button"
                   @click="modal.selectedQuality = 'base'"
-                  class="px-2 py-1.5 rounded text-xs font-bold border transition"
-                  :class="modal.selectedQuality === 'base' ? 'bg-coral-dark text-white border-coral-dark' : 'bg-white border-coral-border text-coral-muted hover:text-coral-dark'"
+                  class="px-2 py-2 rounded-md text-xs font-bold border transition"
+                  :class="modal.selectedQuality === 'base' ? 'bg-coral-dark text-white border-coral-dark' : 'bg-white border-coral-border text-coral-dark hover:bg-coral-subtle'"
                 >
                   Normal
                 </button>
@@ -1144,9 +1723,9 @@
                   type="button"
                   @click="modal.selectedQuality = 'bronze'"
                   :disabled="!modal.selectedItem.qualities?.bronze"
-                  class="px-2 py-1.5 rounded text-xs font-bold border transition"
+                  class="px-2 py-2 rounded-md text-xs font-bold border transition"
                   :class="[
-                    modal.selectedQuality === 'bronze' ? 'badge-bronze font-extrabold' : 'bg-white border-coral-border text-coral-muted hover:text-[#8c3c10]',
+                    modal.selectedQuality === 'bronze' ? 'badge-bronze font-extrabold' : 'bg-white border-coral-border text-coral-dark hover:text-[#8c3c10]',
                     !modal.selectedItem.qualities?.bronze ? 'opacity-30 cursor-not-allowed' : ''
                   ]"
                 >
@@ -1156,9 +1735,9 @@
                   type="button"
                   @click="modal.selectedQuality = 'silver'"
                   :disabled="!modal.selectedItem.qualities?.silver"
-                  class="px-2 py-1.5 rounded text-xs font-bold border transition"
+                  class="px-2 py-2 rounded-md text-xs font-bold border transition"
                   :class="[
-                    modal.selectedQuality === 'silver' ? 'badge-silver font-extrabold' : 'bg-white border-coral-border text-coral-muted hover:text-[#405463]',
+                    modal.selectedQuality === 'silver' ? 'badge-silver font-extrabold' : 'bg-white border-coral-border text-coral-dark hover:text-[#405463]',
                     !modal.selectedItem.qualities?.silver ? 'opacity-30 cursor-not-allowed' : ''
                   ]"
                 >
@@ -1168,9 +1747,9 @@
                   type="button"
                   @click="modal.selectedQuality = 'gold'"
                   :disabled="!modal.selectedItem.qualities?.gold"
-                  class="px-2 py-1.5 rounded text-xs font-bold border transition"
+                  class="px-2 py-2 rounded-md text-xs font-bold border transition"
                   :class="[
-                    modal.selectedQuality === 'gold' ? 'badge-gold font-extrabold' : 'bg-white border-coral-border text-coral-muted hover:text-[#8f6804]',
+                    modal.selectedQuality === 'gold' ? 'badge-gold font-extrabold' : 'bg-white border-coral-border text-coral-dark hover:text-[#8f6804]',
                     !modal.selectedItem.qualities?.gold ? 'opacity-30 cursor-not-allowed' : ''
                   ]"
                 >
@@ -1180,16 +1759,16 @@
                   type="button"
                   @click="modal.selectedQuality = 'osmium'"
                   :disabled="!modal.selectedItem.qualities?.osmium"
-                  class="px-2 py-1.5 rounded text-xs font-bold border transition"
+                  class="px-2 py-2 rounded-md text-xs font-bold border transition"
                   :class="[
-                    modal.selectedQuality === 'osmium' ? 'badge-osmium font-extrabold' : 'bg-white border-coral-border text-coral-muted hover:text-[#5b1c8f]',
+                    modal.selectedQuality === 'osmium' ? 'badge-osmium font-extrabold' : 'bg-white border-coral-border text-coral-dark hover:text-[#5b1c8f]',
                     !modal.selectedItem.qualities?.osmium ? 'opacity-30 cursor-not-allowed' : ''
                   ]"
                 >
                   Osmium ★★★★
                 </button>
               </div>
-              <div v-else class="text-[11px] text-coral-muted italic py-1">
+              <div v-else class="text-xs text-coral-muted py-1">
                 Item standar (tidak memiliki varian kualitas bintang di Coral
                 Island).
               </div>
@@ -1198,8 +1777,10 @@
             <!-- Quantity Selection -->
             <div class="space-y-2">
               <div class="flex items-center justify-between text-xs">
-                <span class="font-semibold text-coral-muted"
-                  >Jumlah (Quantity):</span
+                <label
+                  for="modal-qty-number"
+                  class="font-semibold text-coral-dark"
+                  >Jumlah (Quantity):</label
                 >
                 <span class="font-mono font-bold text-coral-dark"
                   >{{ modal.quantity }} unit</span
@@ -1208,48 +1789,54 @@
               <div class="flex items-center gap-3">
                 <input
                   type="range"
+                  aria-label="Slider jumlah item"
                   v-model="modal.quantity"
                   min="1"
                   max="999"
                   class="flex-1 accent-coral-azure cursor-pointer"
                 />
                 <input
+                  id="modal-qty-number"
                   type="number"
                   v-model="modal.quantity"
                   min="1"
                   max="999"
-                  class="w-20 bg-white border border-coral-border rounded-lg px-2.5 py-1 text-xs font-mono text-center font-bold text-coral-dark"
+                  class="w-20 bg-white border border-coral-border rounded-lg px-2.5 py-1.5 text-xs font-mono text-center font-bold text-coral-dark"
                 />
               </div>
-              <!-- Quick Quantity Badges -->
-              <div class="flex gap-2 pt-1">
+              <div class="flex flex-wrap gap-2 pt-1">
                 <button
+                  type="button"
                   @click="setQty(1)"
-                  class="flex-1 text-[11px] bg-white hover:bg-coral-subtle py-1 rounded border border-coral-border text-coral-dark font-medium"
+                  class="flex-1 text-xs bg-white hover:bg-coral-subtle py-1.5 rounded-md border border-coral-border text-coral-dark font-semibold"
                 >
                   1
                 </button>
                 <button
+                  type="button"
                   @click="setQty(50)"
-                  class="flex-1 text-[11px] bg-white hover:bg-coral-subtle py-1 rounded border border-coral-border text-coral-dark font-medium"
+                  class="flex-1 text-xs bg-white hover:bg-coral-subtle py-1.5 rounded-md border border-coral-border text-coral-dark font-semibold"
                 >
                   50
                 </button>
                 <button
+                  type="button"
                   @click="addQty(10)"
-                  class="flex-1 text-[11px] bg-white hover:bg-coral-subtle py-1 rounded border border-coral-border text-coral-dark font-medium"
+                  class="flex-1 text-xs bg-white hover:bg-coral-subtle py-1.5 rounded-md border border-coral-border text-coral-dark font-semibold"
                 >
                   +10
                 </button>
                 <button
+                  type="button"
                   @click="addQty(100)"
-                  class="flex-1 text-[11px] bg-white hover:bg-coral-subtle py-1 rounded border border-coral-border text-coral-dark font-medium"
+                  class="flex-1 text-xs bg-white hover:bg-coral-subtle py-1.5 rounded-md border border-coral-border text-coral-dark font-semibold"
                 >
                   +100
                 </button>
                 <button
+                  type="button"
                   @click="setQty(999)"
-                  class="flex-1 text-[11px] bg-coral-azure/10 hover:bg-coral-azure/20 py-1 rounded border border-coral-azure/30 text-coral-azure font-bold"
+                  class="flex-1 text-xs bg-coral-dark hover:bg-coral-darker py-1.5 rounded-md text-white font-bold"
                 >
                   Max (999)
                 </button>
@@ -1264,7 +1851,7 @@
             <button
               type="button"
               @click="clearSlot"
-              class="px-3.5 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 rounded-lg transition"
+              class="px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 border border-rose-300 rounded-lg transition"
             >
               Kosongkan Slot
             </button>
@@ -1272,7 +1859,7 @@
               <button
                 type="button"
                 @click="closeSlotEditor"
-                class="px-4 py-2 text-xs font-semibold text-coral-muted hover:text-coral-dark transition"
+                class="px-4 py-2 text-xs font-semibold text-coral-dark hover:bg-coral-base rounded-lg transition"
               >
                 Batal
               </button>
@@ -1280,7 +1867,7 @@
                 type="button"
                 @click="applySlotChanges"
                 :disabled="!modal.selectedItem"
-                class="px-5 py-2 text-xs font-bold bg-coral-azure hover:bg-blue-600 text-white rounded-lg shadow-sm transition disabled:opacity-40"
+                class="px-5 py-2 text-xs font-bold bg-coral-azure hover:bg-coral-dark text-white rounded-lg shadow-sm transition disabled:opacity-40"
               >
                 Terapkan ke Slot
               </button>
@@ -1291,21 +1878,23 @@
 
       <!-- TOAST NOTIFICATION -->
       <transition
-        enter-active-class="transform ease-out duration-200 transition"
-        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+        enter-active-class="transform ease-out duration-150 transition"
+        enter-from-class="translate-y-2 opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
         leave-active-class="transition ease-in duration-100"
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
         <div
           v-if="toast.show"
+          role="status"
+          aria-live="polite"
           class="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-xs font-semibold border bg-white"
-          :class="toast.type === 'error' ? 'text-rose-700 border-rose-200' : 'text-coral-dark border-coral-border'"
+          :class="toast.type === 'error' ? 'text-rose-800 border-rose-300' : 'text-coral-dark border-coral-border'"
         >
           <svg
             v-if="toast.type === 'error'"
-            class="w-4 h-4 text-rose-500"
+            class="w-4 h-4 text-rose-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -1319,7 +1908,7 @@
           </svg>
           <svg
             v-else
-            class="w-4 h-4 text-coral-azure"
+            class="w-4 h-4 text-emerald-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -1337,14 +1926,15 @@
 
       <!-- Footer -->
       <footer
-        class="mt-auto border-t border-coral-border bg-coral-card/50 py-4 px-6 text-center text-xs text-coral-muted"
+        class="mt-auto border-t border-coral-border bg-coral-card py-4 px-6 text-center text-xs text-coral-muted"
       >
         <span>
-          SaveToolCoral &bull; Forked and adapted from
+          SaveToolCoral &bull; Diadaptasi dari
           <a
             href="https://github.com/ch1pset/UESaveTool"
             target="_blank"
-            class="text-coral-dark hover:underline font-medium"
+            rel="noopener noreferrer"
+            class="text-coral-dark hover:underline font-semibold"
             >ch1pset/UESaveTool</a
           >
           &bull; Coral Island (UE 4.27)
@@ -1352,7 +1942,6 @@
       </footer>
     </div>
 
-    <!-- App Script (ESM) -->
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -214,45 +214,42 @@ function handleInventory(filePath) {
     gvasObj = gvas;
   }
 
+  let idDict = {};
+  let dtRows = {};
+  try {
+    if (fs.existsSync("./coral_island_id.json")) {
+      idDict = JSON.parse(fs.readFileSync("./coral_island_id.json", "utf8"));
+    }
+    if (fs.existsSync("./DT_InventoryItems.json")) {
+      const dtRaw = JSON.parse(
+        fs.readFileSync("./DT_InventoryItems.json", "utf8"),
+      );
+      dtRows = dtRaw[0]?.Rows || dtRaw.Rows || {};
+    }
+  } catch {}
+
   const items = CoralPlayerEditor.getInventory(gvasObj);
-  const ITEM_NAMES = {
-    item_65083: "Pickaxe",
-    item_65078: "Axe",
-    item_65138: "Watering Can",
-    item_65244: "Hoe",
-    item_80082: "Wood",
-    item_131008: "Scythe",
-    item_61004: "Osmium Ore",
-    item_62004: "Osmium Kelp",
-    item_62008: "Osmium Kelp Essence",
-    item_65063: "Hardwood",
-    item_65221: "Fishing Pole",
-    item_65535: "Auto Chest",
-    item_41029: "Resin",
-    item_65509: "Auto Petter",
-    item_65022: "Aging Barrel",
-    item_65534: "Ultimate Scarecrow",
-    item_50506: "Slime Goop",
-    "item_50320-d": "Osmium Arame",
-    item_50320: "Arame",
-    item_50204: "Murex",
-    item_65359: "Large Fish Bait",
-    item_10002: "Pink Diamond",
-    item_61015: "Diamond",
-    item_50509: "Tough Meat",
-    item_50507: "Silky Fur",
-    item_65358: "Medium Fish Bait",
-    item_134005: "Monarch Caterpillar",
-    item_65107: "Scrap",
-  };
 
   console.log(`\n--- Coral Island Inventory Slots (${items.length} items) ---`);
   for (const it of items) {
-    const name = ITEM_NAMES[it.id] || it.id;
+    const baseId = it.id.replace(/-[a-d]$/, "");
+    const dtRow = dtRows[it.id] || dtRows[baseId];
+    const nsNameKey =
+      dtRow?.name?.Namespace && dtRow?.name?.Key
+        ? `${dtRow.name.Namespace}.${dtRow.name.Key}`
+        : null;
+    const rawNameKey = dtRow?.name?.Key;
+    const nameId =
+      (nsNameKey && idDict[nsNameKey]) ||
+      (rawNameKey && idDict[rawNameKey]) ||
+      idDict[`DT_InventoryItems.${baseId}_name`] ||
+      idDict[baseId] ||
+      dtRow?.name?.SourceString ||
+      it.id;
     const row = Math.floor(it.slotIndex / 10) + 1;
     const col = (it.slotIndex % 10) + 1;
     console.log(
-      `  [Baris ${row}, Slot ${col.toString().padStart(2, " ")}] (Index ${it.slotIndex.toString().padStart(2, " ")}): ${it.id.padEnd(12, " ")} | ${name.padEnd(20, " ")} | Qty: ${it.quantity}`,
+      `  [Baris ${row}, Slot ${col.toString().padStart(2, " ")}] (Index ${it.slotIndex.toString().padStart(2, " ")}): ${it.id.padEnd(14, " ")} | ${nameId.padEnd(26, " ")} | Qty: ${it.quantity}`,
     );
   }
   console.log(
@@ -276,14 +273,62 @@ function handleInfo(filePath) {
     gvasObj = gvas;
   }
 
-  let info = CoralPlayerEditor.getPlayerInfo(gvasObj);
+  const info = CoralPlayerEditor.getPlayerInfo(gvasObj);
+  const stats = CoralPlayerEditor.getPlayerStats(gvasObj);
+  const world = CoralPlayerEditor.getWorldData(gvasObj);
+  const npcs = CoralPlayerEditor.getNpcRelationships(gvasObj);
+  const rankNames = ["F", "E", "D", "C", "B", "A", "S"];
+
   console.log(`\n--- Coral Island Save Information ---`);
-  console.log(`  File      : ${filePath}`);
-  console.log(`  Nama      : ${info.name || "(Kosong)"}`);
-  console.log(`  Gender    : ${info.gender || "(Kosong)"}`);
-  console.log(`  Panggilan : ${info.title || "(Kosong)"}`);
-  console.log(`  Kebun     : ${info.farmName || "(Kosong)"}`);
+  console.log(`  File          : ${filePath}`);
+  console.log(`  Nama          : ${info.name || "(Kosong)"}`);
+  console.log(`  Gender        : ${info.gender || "(Kosong)"}`);
+  console.log(`  Panggilan     : ${info.title || "(Kosong)"}`);
+  console.log(`  Kebun         : ${info.farmName || "(Kosong)"}`);
+  console.log(`  Gold          : ${stats.gold.toLocaleString()}`);
+  console.log(`  Merit Points  : ${stats.meritPoints.toLocaleString()}`);
+  console.log(`  Stamina Fruit : ${stats.staminaFruit}`);
+  console.log(`  Wellness Fruit: ${stats.wellnessFruit}`);
+  console.log(`  Kapasitas Tas : ${stats.inventoryLimit} slot`);
+  console.log(`  Tanggal/Musim : Hari ${world.day}, ${world.season}`);
+  console.log(
+    `  Cuaca         : ${world.currentWeather} (Besok: ${world.weatherForecast})`,
+  );
+  console.log(
+    `  Town Rank     : Rank ${rankNames[world.townRank] || world.townRank} (${world.overallTownPoint} poin)`,
+  );
+  console.log(
+    `  Fast Travel   : ${world.waypoints.length} / ${CoralPlayerEditor.ALL_WAYPOINTS.length} lokasi terbuka`,
+  );
+  console.log(`  Relasi NPC    : ${npcs.length} warga terdaftar`);
   console.log(`-------------------------------------\n`);
+}
+
+function handleNpcs(filePath) {
+  if (!filePath) {
+    console.error("Error: 'npcs' requires file path.");
+    process.exit(1);
+  }
+
+  let gvasObj = null;
+  if (filePath.endsWith(".json")) {
+    gvasObj = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } else {
+    const buf = fs.readFileSync(filePath);
+    const gvas = new Gvas();
+    gvas.deserializeFromBuffer(buf);
+    gvasObj = gvas;
+  }
+
+  const npcs = CoralPlayerEditor.getNpcRelationships(gvasObj);
+  console.log(`\n--- Coral Island NPC Relationships (${npcs.length} NPCs) ---`);
+  for (const n of npcs) {
+    const tag = n.isRomanceable ? "[Romanceable]" : "[Warga]      ";
+    console.log(
+      `  ${n.name.padEnd(16, " ")} (${n.id.padEnd(10, " ")}) ${tag} | ${n.hearts.toString().padStart(2, " ")}/10 Hati (${n.heartPoints.toString().padStart(4, " ")} pts) | Hadiah Minggu Ini: ${n.weeklyGiftsCount}/2`,
+    );
+  }
+  console.log(`------------------------------------------------------------\n`);
 }
 
 function handleSetItem(filePath, options) {
@@ -354,6 +399,9 @@ function main() {
     case "inventory":
     case "inv":
       handleInventory(positional[1]);
+      break;
+    case "npcs":
+      handleNpcs(positional[1]);
       break;
     case "set-item":
       handleSetItem(positional[1], options);
