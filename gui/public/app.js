@@ -15,7 +15,9 @@ createApp({
     const uploading = ref(false);
     const saving = ref(false);
     const hasWorkspaceFile = ref(false);
-    const gameSavePath = ref("");
+    const gameSavePath = ref(
+      "C:\\Users\\shawn\\AppData\\Local\\ProjectCoral\\Saved\\SaveGames\\World_1",
+    );
     const pathCopied = ref(false);
     const fileInputRef = ref(null);
 

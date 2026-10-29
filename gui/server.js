@@ -733,19 +733,12 @@ app.get("/api/download", (req, res) => {
 
 // GET /api/save-path - Helper to get the Coral Island save path for user clipboard
 app.get("/api/save-path", (req, res) => {
-  const gamePath = path.join(
-    os.homedir(),
-    "AppData",
-    "Local",
-    "ProjectCoral",
-    "Saved",
-    "SaveGames",
-    "World_1",
-  );
+  const staticPath =
+    "C:\\Users\\shawn\\AppData\\Local\\ProjectCoral\\Saved\\SaveGames\\World_1";
   res.json({
     success: true,
-    path: gamePath,
-    exists: fs.existsSync(gamePath),
+    path: staticPath,
+    exists: fs.existsSync(staticPath),
   });
 });
 
