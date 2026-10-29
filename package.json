@@ -12,7 +12,11 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
+    "start": "node gui/server.js",
     "test": "node test/test_roundtrip.js",
     "gui": "node gui/server.js"
   },
